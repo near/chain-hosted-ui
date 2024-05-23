@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "ES5",
+    "noEmit": true,
+    "noImplicitAny": false,
+    "outDir": "lib",
+  },
+  "files": [
+    "sandbox-ts/main.ava.ts",
+    "src/contract.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+}
