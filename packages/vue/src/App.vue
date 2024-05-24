@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import * as nacl from 'tweetnacl';
 import HelloWorld from './components/HelloWorld.vue'
-const generateKey = (secret: string) => nacl.box.keyPair.fromSecretKey(new TextEncoder().encode(secret));
+
+const { generateKey } = defineProps<{ generateKey: (secret: string) => nacl.BoxKeyPair }>()
 </script>
 
 <template>

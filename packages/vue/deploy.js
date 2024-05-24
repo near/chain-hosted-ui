@@ -12,7 +12,7 @@ const { environments } = BOSConfig
 
 async function deployAssets() {
   const [,, network] = process.argv;
-  const { rpcUrl, fileContract, deployerAccount } = environments[network];
+  const { rpcUrl, fileContract, deployerAccount } = environments[network || 'testnet'];
 
   const provider = new JsonRpcProvider({ url: rpcUrl });
   const signer = new InMemorySigner(new UnencryptedFileSystemKeyStore(path.resolve(os.homedir(), '.near-credentials')));
@@ -21,7 +21,11 @@ async function deployAssets() {
     deployerAccount
   );
 
-  await Promise.all(fs.readdirSync('./dist/assets')
+  const filePaths = fs.readdirSync('./dist/assets', { recursive: true })
+    .filter((e) => e.endsWith('.js') || e.endsWith('.css')) // TODO why isn't dirent.isFile() working here?
+    .map((p) => p.replace('dist/assets/', ''))
+
+  await Promise.all(filePaths
     .map((filename) => {
       deployer.functionCall({
         contractId: fileContract,

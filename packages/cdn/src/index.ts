@@ -13,9 +13,10 @@ app.get('/*', async function (req, res) {
   console.log(key)
   try {
     if (!cached) {
-      const [accountId, filename] = key.split('/');
-      // const filestring = await (new Account(Connection.fromConfig({ networkId: 'testnet', provider: new JsonRpcProvider({ url: 'https://rpc.testnet.near.org' }) }), 'nahhhh.testnet')).viewFunction({ contractId: 'fs0.testnet',  methodName: 'get_file', args: { account_id: accountId, filename } })
+      const [accountId, ...filecomponents] = key.split('/');
+      const filename = filecomponents.join('/')
       const provider = new JsonRpcProvider({ url: 'https://rpc.testnet.near.org' });
+
       const { result } = await provider.query({
         request_type: 'call_function',
         account_id: 'fs0.testnet',

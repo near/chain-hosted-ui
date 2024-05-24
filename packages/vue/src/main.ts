@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
 import './style.css'
-import App from './App.vue'
+import BosRoot from './BosRoot.vue'
 
-createApp(App).mount('#app')
+createApp(BosRoot).mount('#app')
