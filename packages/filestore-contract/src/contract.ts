@@ -29,4 +29,11 @@ class StatusMessage {
     // used for test UnorderedMap
     return this.filemap.toArray();
   }
+
+  @call({})
+  clear_storage() {
+    // used for test UnorderedMap
+    this.filemap.clear();
+    return 0;
+  }
 }

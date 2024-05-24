@@ -28,6 +28,12 @@ app.get('/*', async function (req, res) {
         }))).toString('base64')
       });
 
+      if (Buffer.from(result).toString() === 'null') {
+        res.statusCode = 404;
+        res.send(`${key} not found`);
+        return;
+      }
+
       const filestring = JSON.parse(`{ "bytes": ${Buffer.from(result).toString()} }`)
       sourceCache.set(req.path, filestring.bytes);
       cached = filestring.bytes.trim();
