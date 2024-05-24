@@ -4,7 +4,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 import BOSConfig from './bos.json' assert { type: 'json' };
 
-const { environments } = BOSConfig
+const { environments, filePathMatchers } = BOSConfig
 const { deployerAccount, fileServerUrl } = environments.testnet;
 
 // https://vitejs.dev/config/
@@ -24,14 +24,16 @@ export default defineConfig({
             return 'preset';
           }
 
+          if (filePathMatchers.some((m) => id.includes(m))) {
+            return 'dev';
+          }
+
           if (id.match(/\/node_modules\/[^/]+\/@vue/g)) {
             const depRootIndex = id.indexOf('/@vue');
             if (depRootIndex > -1) {
               return id.slice(depRootIndex + 1);
             }
           }
-
-          return 'dev'
         },
       },
     },

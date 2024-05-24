@@ -6,5 +6,9 @@
       "deployerAccount": "gormp.testnet",
       "fileServerUrl": "http://localhost:3003"
     }
-  }
+  },
+  "filePathMatchers": [
+    "/src/App.vue",
+    "/src/components"
+  ]
 }
