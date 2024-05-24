@@ -1,4 +1,3 @@
-import { Account, Connection } from '@near-js/accounts';
 import { JsonRpcProvider } from '@near-js/providers';
 import cors from 'cors';
 import express from 'express';
@@ -28,9 +27,9 @@ app.get('/*', async function (req, res) {
         }))).toString('base64')
       });
 
-      const filestring = Buffer.from(result).toString()
-      sourceCache.set(req.path, filestring);
-      cached = filestring;
+      const filestring = JSON.parse(`{ "bytes": ${Buffer.from(result).toString()} }`)
+      sourceCache.set(req.path, filestring.bytes);
+      cached = filestring.bytes.trim();
     }
   } catch (e) {
     console.error(e)
