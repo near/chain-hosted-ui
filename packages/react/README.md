@@ -1,3 +1,16 @@
+##### Reported sizes of the files in `/dist/assets` folder:
+
+| Size |Asset filename |
+| ---- | -------------|
+|475B|dev-Bx9V9zN2.css|
+|1.1K|dev-D1Q3gzkO.js|
+|2.1K|index-0CdIVXjV.js|
+|917B|ndex-BPvgi06w.css|
+|33K|preset-Bueqn8oa.js|
+|4.0K|react-CHdo91hT.svg|
+|96B|react-dom@18.3.1_react@18.3.1|
+|96B|react@18.3.1|
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
