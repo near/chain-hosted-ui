@@ -1,15 +1,14 @@
 ##### Reported sizes of the files in `/dist/assets` folder:
 
-| Size |Asset filename |
-| ---- | -------------|
-|475B|dev-Bx9V9zN2.css|
-|1.1K|dev-D1Q3gzkO.js|
-|2.1K|index-0CdIVXjV.js|
-|917B|ndex-BPvgi06w.css|
-|33K|preset-Bueqn8oa.js|
-|4.0K|react-CHdo91hT.svg|
-|96B|react-dom@18.3.1_react@18.3.1|
-|96B|react@18.3.1|
+| File | Size | Gzip Size |
+| ---- | -------------|------|
+| dist/assets/react-CHdo91hT.svg | 4.13 kB | gzip:  2.05 kB |
+| dist/assets/dev-Bx9V9zN2.css |  0.48 kB | gzip:  0.31 kB |
+| dist/assets/index-BPvgi06w.css |  0.92 kB | gzip:  0.50 kB |
+| dist/assets/index-BfVVFAQx.js |  0.93 kB | gzip:  0.53 kB |
+| dist/assets/dev-BU6OOgR1.js |  0.99 kB | gzip:  0.52 kB |
+| dist/assets/preset-fwREPr4w.js |  33.73 kB | gzip: 11.47 kB |
+| dist/assets/react-B6atbj9n.js |  141.77 kB | gzip: 45.43 kB |
 
 # React + TypeScript + Vite
 

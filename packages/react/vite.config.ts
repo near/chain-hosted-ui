@@ -31,7 +31,7 @@ export default defineConfig({
           if (id.match(/\/node_modules\/[^/]+\/react/g)) {
             const depRootIndex = id.indexOf('/react');
             if (depRootIndex > -1) {
-              return id.slice(depRootIndex + 1);
+              return 'react';
             }
           }
         },
