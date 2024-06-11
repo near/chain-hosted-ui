@@ -2,13 +2,9 @@
   "environments": {
     "testnet": {
       "rpcUrl": "https://rpc.testnet.near.org",
-      "fileContract": "fs0.testnet",
+      "fileContract": "partfs1.testnet",
       "deployerAccount": "gormp.testnet",
       "fileServerUrl": "http://localhost:3003"
     }
-  },
-  "filePathMatchers": [
-    "/src/App.vue",
-    "/src/components"
-  ]
+  }
 }
