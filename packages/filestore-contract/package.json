@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "near-sdk-js build src/contract.ts build/hello_near.wasm",
+    "build:part": "near-sdk-js build src/partitioned.ts build/part.wasm",
+    "build:bin": "near-sdk-js build src/binfs.ts build/binfs.wasm",
     "test": "$npm_execpath run build && ava -- ./build/hello_near.wasm"
   },
   "dependencies": {
