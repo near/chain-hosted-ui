@@ -243,7 +243,7 @@ importers:
         version: 0.4.7(eslint@8.57.0)
       rollup-plugin-visualizer:
         specifier: ^5.12.0
-        version: 5.12.0
+        version: 5.12.0(rollup@4.18.0)
       typescript:
         specifier: ^5.2.2
         version: 5.4.5
@@ -329,9 +329,12 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^5.0.4
         version: 5.0.4(vite@5.2.11)(vue@3.4.27)
+      rollup-plugin-gzip:
+        specifier: ^3.1.2
+        version: 3.1.2(rollup@4.18.0)
       rollup-plugin-visualizer:
         specifier: ^5.12.0
-        version: 5.12.0
+        version: 5.12.0(rollup@4.18.0)
       typescript:
         specifier: ^5.2.2
         version: 5.4.5
@@ -7858,6 +7861,15 @@ packages:
       inherits: 2.0.4
     dev: false
 
+  /rollup-plugin-gzip@3.1.2(rollup@4.18.0):
+    resolution: {integrity: sha512-9xemMyvCjkklgNpu6jCYqQAbvCLJzA2nilkiOGzFuXTUX3cXEFMwIhsIBRF7kTKD/SnZ1tNPcxFm4m4zJ3VfNQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      rollup: '>=2.0.0'
+    dependencies:
+      rollup: 4.18.0
+    dev: true
+
   /rollup-plugin-sourcemaps@0.6.3(@types/node@20.12.12)(rollup@2.79.1):
     resolution: {integrity: sha512-paFu+nT1xvuO1tPFYXGe+XnQvg4Hjqv/eIhG8i5EspfYYPBKL57X7iVbfv55aNVASg3dzWvES9dmWsL2KhfByw==}
     engines: {node: '>=10.0.0'}
@@ -7874,7 +7886,7 @@ packages:
       source-map-resolve: 0.6.0
     dev: false
 
-  /rollup-plugin-visualizer@5.12.0:
+  /rollup-plugin-visualizer@5.12.0(rollup@4.18.0):
     resolution: {integrity: sha512-8/NU9jXcHRs7Nnj07PF2o4gjxmm9lXIrZ8r175bT9dK8qoLlvKTwRMArRCMgpMGlq8CTLugRvEmyMeMXIU2pNQ==}
     engines: {node: '>=14'}
     hasBin: true
@@ -7886,6 +7898,7 @@ packages:
     dependencies:
       open: 8.4.2
       picomatch: 2.3.1
+      rollup: 4.18.0
       source-map: 0.7.4
       yargs: 17.7.2
     dev: true
