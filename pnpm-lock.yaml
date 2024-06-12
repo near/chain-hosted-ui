@@ -193,11 +193,30 @@ importers:
         specifier: ^5.3.3
         version: 5.4.5
 
+  packages/presets:
+    dependencies:
+      '@near-wallet-selector/core':
+        specifier: ^8.9.8
+        version: 8.9.8(near-api-js@2.1.4)
+      '@near-wallet-selector/here-wallet':
+        specifier: ^8.9.8
+        version: 8.9.8(borsh@0.7.0)(near-api-js@2.1.4)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.61
+        version: 18.3.2
+
   packages/react:
     dependencies:
-      '@chain-deployed-ui/react-preset':
+      '@chain-deployed-ui/presets':
         specifier: workspace:*
-        version: link:../react-preset
+        version: link:../presets
     devDependencies:
       '@near-js/accounts':
         specifier: ^1.2.0
@@ -253,25 +272,6 @@ importers:
       vite:
         specifier: ^5.2.0
         version: 5.2.11
-
-  packages/react-preset:
-    dependencies:
-      '@near-wallet-selector/core':
-        specifier: ^8.9.8
-        version: 8.9.8(near-api-js@2.1.4)
-      '@near-wallet-selector/here-wallet':
-        specifier: ^8.9.8
-        version: 8.9.8(borsh@0.7.0)(near-api-js@2.1.4)
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.1
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/react':
-        specifier: ^18.2.61
-        version: 18.3.2
 
   packages/typescript-config: {}
 

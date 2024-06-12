@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chain-deployed-ui/react-preset": "workspace:*"
+    "@chain-deployed-ui/presets": "workspace:*"
   },
   "devDependencies": {
     "@near-js/accounts": "^1.2.0",

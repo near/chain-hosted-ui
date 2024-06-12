@@ -1,5 +1,5 @@
 {
-  "name": "@chain-deployed-ui/react-preset",
+  "name": "@chain-deployed-ui/presets",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
