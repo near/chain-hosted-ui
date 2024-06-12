@@ -1,3 +1,5 @@
+import { NearContext, NearDappProvider } from '@chain-deployed-ui/react-preset'
+import { useContext } from 'react';
 import * as nacl from "tweetnacl";
 
 import "./App.css";
@@ -11,9 +13,12 @@ function App({
 }: {
   generateKey: (secret: string) => nacl.BoxKeyPair;
 }) {
+  const wallet = useContext(NearContext);
   return (
-    <>
+    <NearDappProvider>
       <div>
+        <h2>wallet initialized? {(wallet === null).toString()}</h2>
+        <h2>signed in? {(wallet?.isSignedIn() || false).toString()}</h2>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -22,7 +27,7 @@ function App({
         </a>
         <KeysGenerator msg="Vite + React" generateKey={generateKey} />
       </div>
-    </>
+    </NearDappProvider>
   );
 }
 
