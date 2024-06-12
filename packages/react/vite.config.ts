@@ -25,7 +25,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          preset: ['@chain-deployed-ui/react-preset']
+          preset: ['@chain-deployed-ui/react-preset', 'react', 'react-dom']
         },
       },
     },
