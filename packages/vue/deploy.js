@@ -50,8 +50,6 @@ async function deployAssets() {
       i++;
       console.log(`part ${i} uploaded!`)
     }
-
-
   }
 }
 

@@ -11,12 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "tweetnacl": "^1.0.3"
+    "@chain-deployed-ui/react-preset": "workspace:*"
   },
   "devDependencies": {
-    "@chain-deployed-ui/react-preset": "workspace:*",
     "@near-js/accounts": "^1.2.0",
     "@near-js/keystores-node": "^0.0.11",
     "@near-js/providers": "^0.2.1",
@@ -29,6 +26,8 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rollup-plugin-gzip": "^3.1.2",
     "rollup-plugin-visualizer": "^5.12.0",
     "typescript": "^5.2.2",
