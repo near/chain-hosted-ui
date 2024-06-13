@@ -4,7 +4,7 @@
   "license": "(MIT AND Apache-2.0)",
   "type": "module",
   "scripts": {
-    "build": "near-sdk-js build src/contract.ts build/hello_near.wasm",
+    "build": "near-sdk-js build src/contract.ts build/paid_storage_contract.wasm",
     "test": "pnpm run build && ava -- ./build/hello_near.wasm"
   },
   "dependencies": {
