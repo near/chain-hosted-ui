@@ -1,4 +1,4 @@
-import { NearContext, NearDappProvider } from '@chain-deployed-ui/react-preset'
+import { NearContext, NearDappProvider } from '@chain-deployed-ui/presets/react'
 import { useContext } from 'react';
 
 import "./App.css";
