@@ -10,9 +10,8 @@ export default defineConfig({
     name: 'inject-bundle-url',
     apply: 'build',
     transformIndexHtml(html ) {
-      // TODO prefix root-level assets
-      // return html.replace(/(href|src)="\/((?:[\w\s-]+\/)*[^/]+\.js|css)/g, `$1="${deployerAccount}/$2`);
-      return html;
+      // TODO prefix root-level assets - this only removes the leading /
+      return html.replace(/(href|src)="\/((?:[\w\s-]+\/)*[^/]+\.(?:js|css|svg))/g, `$1="$2`);
     }
   }],
   define: {
@@ -23,7 +22,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          preset: presetBundles.react
+          preset: presetBundles.react,
         },
       },
     },
