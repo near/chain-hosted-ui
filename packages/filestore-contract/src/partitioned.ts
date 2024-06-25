@@ -16,6 +16,47 @@ class StatusMessage {
   }
 
   /**
+   * List all file keys
+   */
+  @view({})
+  list_all_files(): string[] {
+    // @ts-ignore
+    return this.filemap.keys({})
+  }
+
+  /**
+   * List all partitions
+   */
+  @view({})
+  list_all_partitions(): string[] {
+    // @ts-ignore
+    return this.partitions.keys({})
+  }
+
+  /**
+   * List file keys for a given author
+   * @param account_id owner of the files
+   */
+  @view({})
+  list_files({ account_id }: { account_id: string }): string[] {
+    // @ts-ignore
+    return this.filemap.keys({}).filter((k: string) => k.startsWith(account_id));
+  }
+
+  /**
+   * List application authors
+   */
+  @view({})
+  list_authors(): string[] {
+    // @ts-ignore
+    return Object.keys(this.filemap.keys({}).reduce((authors: any, file: string) => {
+      // @ts-ignore
+      authors[file.split('/')[0]] = true;
+      return authors;
+    }, {}));
+  }
+
+  /**
    * Get the number of partitions for the specified file
    * @param account_id owner of the file
    * @param filename name of the file
@@ -58,13 +99,27 @@ class StatusMessage {
    * @param filename name of the file
    */
   @call({})
-  delete_file({ filename }: { filename: string }) {
+  delete_file({ filename, partsToDelete }: { filename: string, partsToDelete?: number }): { remainingParts: number } {
     const fileKey = `${near.signerAccountId()}/${filename}`;
     const parts = this.filemap.get(fileKey);
-    let i = 0;
-    while (i < parts) {
-      this.partitions.remove(`${fileKey}-${i++}`);
+    if (parts === null) {
+      return { remainingParts: -1 }
     }
-    this.filemap.remove(fileKey);
+
+    const MAX_PARTS = 3;
+    const isPartialDelete = parts > (partsToDelete || MAX_PARTS);
+    let i = parts;
+    while (i >= (isPartialDelete ? parts - (partsToDelete || MAX_PARTS) : 0)) {
+      this.partitions.remove(`${fileKey}-${--i}`);
+    }
+
+    const remainingParts = i + 1;
+    if (!isPartialDelete) {
+      this.filemap.remove(fileKey);
+    } else {
+      this.filemap.set(fileKey, remainingParts);
+    }
+
+    return { remainingParts }
   }
 }
