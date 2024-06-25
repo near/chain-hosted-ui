@@ -35,6 +35,6 @@
     }
   },
   "bin": {
-    "upload-bundle": "./dist/index.js"
+    "upload-bundle": "./dist/upload-bundle.js"
   }
 }
