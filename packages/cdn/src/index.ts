@@ -80,6 +80,13 @@ app.get('/*', async function (req, res) {
     return;
   }
 
+  if (req.path.endsWith('.svg')) {
+    res.set('Content-Type', 'text/svg+xml');
+    res.set('Content-Encoding', 'gzip');
+    res.send(cached!);
+    return;
+  }
+
   if (req.path.endsWith('.html')) {
     res.set('Content-Type', 'text/html');
     res.send(cached!);
