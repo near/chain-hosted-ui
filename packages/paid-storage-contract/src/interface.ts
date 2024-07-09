@@ -1,43 +1,14 @@
-// ! DO NOT USE, THIS WAS CREATED BEFORE FINDING near-contract-standards PACKAGE
-
-
-// original: https://github.com/near/NEPs/blob/master/neps/nep-0145.md#interface
-// converted to TS interface syntax for direct consumption
-
-/**
- * The structure that will be returned for the methods:
- * * `storage_deposit`
- * * `storage_withdraw`
- * * `storage_balance_of`
- * The `total` and `available` values are string representations of unsigned
- * 128-bit integers showing the balance of a specific account in yoctoⓃ.
- */
 export type StorageBalance = {
-  total: string;
-  available: string;
+  total: bigint;
+  available: bigint;
 };
 
-/**
- * The below structure will be returned for the method `storage_balance_bounds`.
- * Both `min` and `max` are string representations of unsigned 128-bit integers.
- *
- * `min` is the amount of tokens required to start using this contract at all
- * (eg to register with the contract). If a new contract user attaches `min`
- * NEAR to a `storage_deposit` call, subsequent calls to `storage_balance_of`
- * for this user must show their `total` equal to `min` and `available=0` .
- *
- * A contract may implement `max` equal to `min` if it only charges for initial
- * registration, and does not adjust per-user storage over time. A contract
- * which implements `max` must refund deposits that would increase a user's
- * storage balance beyond this amount.
- */
 export type StorageBalanceBounds = {
-  min: string;
-  max: string | null;
+  min: bigint;
+  max: bigint | null;
 };
 
 export interface NEP_0145 {
-
   /************************************/
   /* CHANGE METHODS on fungible token */
   /************************************/
@@ -59,7 +30,7 @@ export interface NEP_0145 {
    */
   storage_deposit(
     account_id: string | null,
-    registration_only: boolean | null
+    registration_only: boolean | null,
   ): StorageBalance;
 
   /**
@@ -77,7 +48,7 @@ export interface NEP_0145 {
    * function-call access-key call (UX wallet security)
    *
    * Returns the StorageBalance structure showing updated balances.
-  */
+   */
   storage_withdraw(amount: string | null): StorageBalance;
 
   /**
@@ -101,7 +72,7 @@ export interface NEP_0145 {
    *
    * Returns `true` iff the account was successfully unregistered.
    * Returns `false` iff account was not registered before.
-  */
+   */
   storage_unregister(force: boolean | null): boolean;
 
   /****************/
@@ -110,7 +81,7 @@ export interface NEP_0145 {
   /**
    * Returns minimum and maximum allowed balance amounts to interact with this
    * contract. See StorageBalanceBounds.
-  */
+   */
   storage_balance_bounds(): StorageBalanceBounds;
 
   /**
@@ -118,7 +89,6 @@ export interface NEP_0145 {
    * provided. Must panic if `account_id` is invalid.
    *
    * If `account_id` is not registered, must return `null`.
-  */
+   */
   storage_balance_of(account_id: string): StorageBalance | null;
-
 }

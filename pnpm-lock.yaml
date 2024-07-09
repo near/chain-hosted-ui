@@ -197,10 +197,10 @@ importers:
     dependencies:
       near-contract-standards:
         specifier: ^2.0.0
-        version: 2.0.0(@types/babel__core@7.20.5)(@types/node@16.18.97)
+        version: 2.0.0(@types/babel__core@7.20.5)(@types/node@20.12.12)
       near-sdk-js:
-        specifier: 1.0.0
-        version: 1.0.0(@types/babel__core@7.20.5)(@types/node@16.18.97)
+        specifier: 2.0.0-0
+        version: 2.0.0-0(@types/babel__core@7.20.5)(@types/node@20.12.12)
     devDependencies:
       ava:
         specifier: ^6.1.3
@@ -3687,10 +3687,6 @@ packages:
     resolution: {integrity: sha512-bL0We378hFZ0/xHAKP5mAWKS5OjzU6+VuvMlXpMwyFAwG2s5NwOnzRTezvYYwQNtG3iU+xvQ6jWvp7UO1STGLQ==}
     hasBin: true
 
-  near-sdk-js@1.0.0:
-    resolution: {integrity: sha512-kgZUxt+3GKv61tOGHTI1bjJo1/OkKYvKjZK6eoew9tdgp2FJ36VLJnn4gQ4yl9DgJB+vmT3EIUXHXhLTjFlLow==}
-    hasBin: true
-
   near-sdk-js@2.0.0:
     resolution: {integrity: sha512-mE+FAUI5uXJafdtWjHcar8ow7EAUcAK0WH+kuaxbN8KitbuCMVdY4b1GQT48p3qhg7EUYbFy6x+7+Sf6vNitMw==}
     hasBin: true
@@ -6344,6 +6340,25 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@4.7.4)':
+    dependencies:
+      '@eslint-community/regexpp': 4.10.0
+      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/scope-manager': 5.62.0
+      '@typescript-eslint/type-utils': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      debug: 4.3.4(supports-color@5.5.0)
+      eslint: 8.57.0
+      graphemer: 1.4.0
+      ignore: 5.3.1
+      natural-compare-lite: 1.4.0
+      semver: 7.6.2
+      tsutils: 3.21.0(typescript@4.7.4)
+    optionalDependencies:
+      typescript: 4.7.4
+    transitivePeerDependencies:
+      - supports-color
+
   '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
@@ -6386,7 +6401,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/types': 5.62.0
-      '@typescript-eslint/typescript-estree': 5.62.0(typescript@5.4.5)
+      '@typescript-eslint/typescript-estree': 5.62.0(typescript@4.7.4)
       debug: 4.3.4(supports-color@5.5.0)
       eslint: 8.57.0
     optionalDependencies:
@@ -6398,7 +6413,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/types': 5.62.0
-      '@typescript-eslint/typescript-estree': 5.62.0(typescript@5.4.5)
+      '@typescript-eslint/typescript-estree': 5.62.0(typescript@4.7.4)
       debug: 4.3.4(supports-color@5.5.0)
       eslint: 8.57.0
     optionalDependencies:
@@ -6511,7 +6526,7 @@ snapshots:
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.6.2
-      tsutils: 3.21.0(typescript@5.4.5)
+      tsutils: 3.21.0(typescript@4.7.4)
     optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -7819,6 +7834,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@7.10.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0):
+    dependencies:
+      debug: 3.2.7
+    optionalDependencies:
+      '@typescript-eslint/parser': 7.10.0(eslint@8.57.0)(typescript@5.4.5)
+      eslint: 8.57.0
+      eslint-import-resolver-node: 0.3.9
+    transitivePeerDependencies:
+      - supports-color
+
   eslint-plugin-eslint-comments@3.2.0(eslint@8.57.0):
     dependencies:
       escape-string-regexp: 1.0.5
@@ -7835,7 +7860,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.4.5))(eslint-plugin-import@2.29.1)(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@7.10.0(eslint@8.57.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0)
       hasown: 2.0.2
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -9198,10 +9223,10 @@ snapshots:
       - encoding
       - supports-color
 
-  near-contract-standards@2.0.0(@types/babel__core@7.20.5)(@types/node@16.18.97):
+  near-contract-standards@2.0.0(@types/babel__core@7.20.5)(@types/node@20.12.12):
     dependencies:
       lodash-es: 4.17.21
-      near-sdk-js: 2.0.0(@types/babel__core@7.20.5)(@types/node@16.18.97)
+      near-sdk-js: 2.0.0(@types/babel__core@7.20.5)(@types/node@20.12.12)
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -9228,7 +9253,7 @@ snapshots:
       got: 11.8.6
       tar: 6.2.1
 
-  near-sdk-js@1.0.0(@types/babel__core@7.20.5)(@types/node@16.18.97):
+  near-sdk-js@2.0.0(@types/babel__core@7.20.5)(@types/node@20.12.12):
     dependencies:
       '@babel/core': 7.24.5
       '@babel/plugin-proposal-decorators': 7.24.1(@babel/core@7.24.5)
@@ -9244,41 +9269,11 @@ snapshots:
       commander: 9.5.0
       eslint: 8.57.0
       json-schema: 0.4.0
-      near-abi: 0.1.1
-      near-typescript-json-schema: 0.55.0
-      rollup: 2.79.1
-      rollup-plugin-sourcemaps: 0.6.3(@types/node@16.18.97)(rollup@2.79.1)
-      signale: 1.4.0
-      ts-morph: 16.0.0
-      typescript: 4.7.4
-    transitivePeerDependencies:
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/babel__core'
-      - '@types/node'
-      - supports-color
-
-  near-sdk-js@2.0.0(@types/babel__core@7.20.5)(@types/node@16.18.97):
-    dependencies:
-      '@babel/core': 7.24.5
-      '@babel/plugin-proposal-decorators': 7.24.1(@babel/core@7.24.5)
-      '@babel/preset-typescript': 7.24.1(@babel/core@7.24.5)
-      '@babel/types': 7.24.5
-      '@rollup/plugin-babel': 5.3.1(@babel/core@7.24.5)(@types/babel__core@7.20.5)(rollup@2.79.1)
-      '@rollup/plugin-commonjs': 21.1.0(rollup@2.79.1)
-      '@rollup/plugin-node-resolve': 13.3.0(rollup@2.79.1)
-      '@scure/base': 1.1.6
-      '@types/estree': 1.0.5
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@4.7.4))(eslint@8.57.0)(typescript@4.7.4)
-      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
-      commander: 9.5.0
-      eslint: 8.57.0
-      json-schema: 0.4.0
       lodash-es: 4.17.21
       near-abi: 0.1.1
       near-typescript-json-schema: 0.55.0
       rollup: 2.79.1
-      rollup-plugin-sourcemaps: 0.6.3(@types/node@16.18.97)(rollup@2.79.1)
+      rollup-plugin-sourcemaps: 0.6.3(@types/node@20.12.12)(rollup@2.79.1)
       signale: 1.4.0
       ts-morph: 16.0.0
       typescript: 4.7.4
@@ -9300,8 +9295,8 @@ snapshots:
       '@rollup/plugin-node-resolve': 13.3.0(rollup@2.79.1)
       '@scure/base': 1.1.6
       '@types/estree': 1.0.5
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@4.7.4))(eslint@8.57.0)(typescript@4.7.4)
-      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
       commander: 9.5.0
       eslint: 8.57.0
       json-schema: 0.4.0
@@ -9310,6 +9305,37 @@ snapshots:
       near-typescript-json-schema: 0.55.0
       rollup: 2.79.1
       rollup-plugin-sourcemaps: 0.6.3(@types/node@16.18.97)(rollup@2.79.1)
+      signale: 1.4.0
+      ts-morph: 16.0.0
+      typescript: 4.7.4
+    transitivePeerDependencies:
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/babel__core'
+      - '@types/node'
+      - supports-color
+
+  near-sdk-js@2.0.0-0(@types/babel__core@7.20.5)(@types/node@20.12.12):
+    dependencies:
+      '@babel/core': 7.24.5
+      '@babel/plugin-proposal-decorators': 7.24.1(@babel/core@7.24.5)
+      '@babel/preset-typescript': 7.24.1(@babel/core@7.24.5)
+      '@babel/types': 7.24.5
+      '@rollup/plugin-babel': 5.3.1(@babel/core@7.24.5)(@types/babel__core@7.20.5)(rollup@2.79.1)
+      '@rollup/plugin-commonjs': 21.1.0(rollup@2.79.1)
+      '@rollup/plugin-node-resolve': 13.3.0(rollup@2.79.1)
+      '@scure/base': 1.1.6
+      '@types/estree': 1.0.5
+      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@4.7.4))(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      commander: 9.5.0
+      eslint: 8.57.0
+      json-schema: 0.4.0
+      lodash-es: 4.17.21
+      near-abi: 0.1.1
+      near-typescript-json-schema: 0.55.0
+      rollup: 2.79.1
+      rollup-plugin-sourcemaps: 0.6.3(@types/node@20.12.12)(rollup@2.79.1)
       signale: 1.4.0
       ts-morph: 16.0.0
       typescript: 4.7.4
@@ -10030,6 +10056,14 @@ snapshots:
     optionalDependencies:
       '@types/node': 16.18.97
 
+  rollup-plugin-sourcemaps@0.6.3(@types/node@20.12.12)(rollup@2.79.1):
+    dependencies:
+      '@rollup/pluginutils': 3.1.0(rollup@2.79.1)
+      rollup: 2.79.1
+      source-map-resolve: 0.6.0
+    optionalDependencies:
+      '@types/node': 20.12.12
+
   rollup-plugin-visualizer@5.12.0(rollup@4.18.0):
     dependencies:
       open: 8.4.2
@@ -10602,11 +10636,6 @@ snapshots:
     dependencies:
       tslib: 1.14.1
       typescript: 4.7.4
-
-  tsutils@3.21.0(typescript@5.4.5):
-    dependencies:
-      tslib: 1.14.1
-      typescript: 5.4.5
 
   tunnel-agent@0.6.0:
     dependencies:
