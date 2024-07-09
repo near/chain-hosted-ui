@@ -96,7 +96,7 @@ class UserStorage implements StorageManagement {
       throw Error(`The account ${predecessor_account_id} is not registered`);
     }
   }
-  
+
   storage_unregister({ force }: { force: boolean }): boolean {
     const predecessor_account_id = near.predecessorAccountId();
 
