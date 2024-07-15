@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-const PARTITION_SIZE = 100_000;
+const PARTITION_SIZE = 600_000;
 
 export async function deployFiles() {
   const [,, basePath, network, fileContract, deployerAccount, application, isLiveRun = true] = process.argv;
@@ -33,11 +33,24 @@ export async function deployFiles() {
   const distPath = path.resolve(process.env.PWD as string, basePath);
   const filePaths = fs.readdirSync(distPath, { recursive: true })
     .map((f) => f.toString())
-    .filter((e) => (e.endsWith('.gz') || e.endsWith('.html')) && !e.endsWith('.html.gz'))
+    .filter((e) => (e.endsWith('.gz') || e.endsWith('.html')) && !e.endsWith('.html.gz'));
+  const contentPaths = filePaths.map((f) => `${deployerAccount}/${application}/${f.replace(/\.gz$/, '')}`);
 
-  for (let filename of filePaths) {
+  if (isLiveRun === true) {
+    await deployer.functionCall({
+      contractId: fileContract,
+      methodName: 'deploy_application',
+      args: {
+        application,
+        files: contentPaths,
+      },
+      gas: BigInt('300000000000000'),
+    });
+  }
+
+  for (let [fileIndex, filename] of filePaths.entries()) {
     const bundleBinary = fs.readFileSync(path.resolve(distPath, filename)).toString('base64');
-    const contentPath = `${application}/${filename.replace(/\.gz$/, '')}`;
+    const contentPath = contentPaths[fileIndex];
 
     let i = 0;
     const partitions = Math.ceil(bundleBinary.length / PARTITION_SIZE);
@@ -48,9 +61,10 @@ export async function deployFiles() {
       if (isLiveRun === true) {
         await deployer.functionCall({
           contractId: fileContract,
-          methodName: 'upload_file',
+          methodName: 'upload_file_partition',
           args: {
-            filename: contentPath,
+            application,
+            filename: filename.replace(/\.gz$/, ''),
             bytes,
             part: i,
             totalParts: partitions,
@@ -61,6 +75,20 @@ export async function deployFiles() {
       i++;
     }
     console.log(`[${filename}] uploaded ${i}/${partitions}`)
+  }
+
+
+  console.log(`all files uploaded for ${application}, beginning post-deploy actions`)
+  if (isLiveRun === true) {
+    // @ts-ignore
+    (await deployer.functionCall({
+      contractId: fileContract,
+      methodName: 'post_deploy_cleanup',
+      args: {
+        application,
+      },
+      gas: BigInt('300000000000000'),
+    }));
   }
 }
 

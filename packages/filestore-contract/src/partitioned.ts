@@ -6,13 +6,49 @@ import {
   UnorderedMap,
 } from "near-sdk-js";
 
+class Application {
+  currentVersion: number = 0;
+  nextVersion: number | null = null;
+  currentFiles: string[] = [];
+  nextFiles: string[] = [];
+  previousFiles: string[] = [];
+}
+
 @NearBindgen({})
 class StatusMessage {
+  applications: UnorderedMap<Application>;
   filemap: UnorderedMap<number>;
   partitions: UnorderedMap<string>;
   constructor() {
+    this.applications = new UnorderedMap("apps");
     this.filemap = new UnorderedMap("pieces");
     this.partitions = new UnorderedMap("parts");
+  }
+
+  buildApplicationKey(application: string, account: string, ) {}
+
+  startDeployment({ app, account_id, application, files }: { app: Application, account_id: string, application: string, files: string[] }) {
+    app.nextVersion = app.currentVersion + 1;
+    // @ts-ignore
+    app.nextFiles = files.map((f: string) => `v${app.nextVersion}_${f}`);
+    this.applications.set(`${account_id}/${application}`, app);
+  }
+
+  completeDeployment({ app, account_id, application }: { app: Application, account_id: string, application: string }) {
+    // @ts-ignore
+    app.previousFiles = (app?.previousFiles || []).concat(app?.currentFiles || [])
+    app.currentFiles = app.nextFiles;
+    app.nextFiles = [];
+    app.currentVersion = app.nextVersion!;
+    app.nextVersion = null;
+    this.applications.set(`${account_id}/${application}`, app)
+  }
+
+  completeFileUpload({ account_id, application, filename }: { account_id: string, application: string, filename: string }) {
+    const app = this.applications.get(`${account_id}/${application}`);
+    // @ts-ignore
+    app.nextFiles = app.nextFiles.filter((f: string) => f === filename);
+    this.applications.set(application, app);
   }
 
   /**
@@ -57,13 +93,41 @@ class StatusMessage {
   }
 
   /**
+   * List the files for a specified application
+   * @param application name of target application
+   */
+  @view({})
+  list_application_files({ account_id, application }: { account_id: string, application: string }): string[] {
+    return this.applications.get(`${account_id}/${application}`)?.currentFiles;
+  }
+
+  /**
+   * Get specified application
+   * @param application name of target application
+   */
+  @view({})
+  get_application({ account_id, application }: { account_id: string, application: string }): Application {
+    return this.applications.get(`${account_id}/${application}`);
+  }
+
+  /**
    * Get the number of partitions for the specified file
    * @param account_id owner of the file
    * @param filename name of the file
    */
   @view({})
-  get_parts({ account_id, filename }: { account_id: string, filename: string }): number {
-    return this.filemap.get(`${account_id}/${filename}`)
+  get_parts({ application, account_id, filename }: { account_id: string, application: string, filename: string }): number {
+    const app = this.applications.get(`${account_id}/${application}`);
+    if (!app) {
+      throw new Error(`no application ${account_id}/${application}`);
+    }
+
+    const filepath = `v${app.currentVersion}_${account_id}/${application}/${filename}`;
+    const file = app.currentFiles.find((f: string) => f === filepath);
+    if (!file) {
+      throw new Error(`no match for ${filepath} in [${app.currentFiles.join(',')}]`)
+    }
+    return this.filemap.get(file)
   }
 
   /**
@@ -73,24 +137,70 @@ class StatusMessage {
    * @param part partition index
    */
   @view({})
-  get_partition({ account_id, filename, part }: { account_id: string, filename: string, part: number }): string {
-    return this.partitions.get(`${account_id}/${filename}-${part}`)
+  get_partition({ application, account_id, filename, part }: { application: string, account_id: string, filename: string, part: number }): string {
+    const files = this.applications.get(`${account_id}/${application}`)?.currentFiles || [];
+    // @ts-ignore
+    const filepath = files.find((f: string) => f.endsWith(filename));
+    return this.partitions.get(`${filepath}-${part}`)
   }
 
   /**
-   * Get a specific file partition
-   * @param account_id owner of the file
+   * Begin application deploy
+   * @param application app to which the file belongs
+   */
+  @call({})
+  deploy_application({ application, files }: { application: string, files: string[] }) {
+    const appKey = `${near.signerAccountId()}/${application}`
+    let app = this.applications.get(appKey);
+    if (!app) {
+      app = new Application();
+      this.applications.set(appKey, app);
+    }
+    this.startDeployment({ app, account_id: near.signerAccountId(), application, files });
+  }
+
+  /**
+   * Begin application deploy
+   * @param application app to which the file belongs
+   */
+  @call({})
+  post_deploy_cleanup({ application }: { application: string }): string[] {
+    const app = this.applications.get(`${near.signerAccountId()}/${application}`)!;
+    const files = app.currentFiles;
+    this.completeDeployment({ app, account_id: near.signerAccountId(), application });
+    return files;
+  }
+
+  @call({})
+  delete_application({ account_id, application }: { account_id: string, application: string }) {
+    this.applications.remove(`${account_id}/${application}`)
+  }
+
+  /**
+   * Upload a file partition
+   * @param application app to which the file belongs
    * @param filename name of the file
+   * @param bytes binary file partition data encoded as base64 substring
    * @param part partition index
    * @param totalParts total number of partitions for this file
    */
   @call({})
-  upload_file({ filename, bytes, part, totalParts }: { filename: string, bytes: string, part: number, totalParts: number }) {
-    const fileKey = `${near.signerAccountId()}/${filename}`;
+  upload_file_partition({ application, filename, bytes, part, totalParts }: { application: string, filename: string, bytes: string, part: number, totalParts: number }) {
+    const app = this.applications.get(`${near.signerAccountId()}/${application}`);
+    if (!app) {
+      // @ts-ignore
+      throw new Error(`no application ${near.signerAccountId()}/${application} - call the "deploy_application" method before uploading file partitions`);
+    }
+
+    const fileKey = `v${app.nextVersion}_${near.signerAccountId()}/${application}/${filename}`;
     if (!this.filemap.get(fileKey)) {
       this.filemap.set(fileKey, totalParts);
     }
+
     this.partitions.set(`${fileKey}-${part}`, bytes);
+    if (part === totalParts) {
+      this.completeFileUpload({ account_id: near.signerAccountId(), application, filename });
+    }
   }
 
 
@@ -99,8 +209,8 @@ class StatusMessage {
    * @param filename name of the file
    */
   @call({})
-  delete_file({ filename, partsToDelete }: { filename: string, partsToDelete?: number }): { remainingParts: number } {
-    const fileKey = `${near.signerAccountId()}/${filename}`;
+  delete_file({ appVersion, application, filename, partsToDelete }: { appVersion: string, application: string, filename: string, partsToDelete?: number }): { remainingParts: number } {
+    const fileKey = `v${appVersion}_${near.signerAccountId()}/${application}/${filename}`;
     const parts = this.filemap.get(fileKey);
     if (parts === null) {
       return { remainingParts: -1 }
