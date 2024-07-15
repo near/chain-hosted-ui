@@ -13,7 +13,7 @@ export async function deployFiles() {
   let rpcUrl;
   switch (network || 'testnet') {
     case 'testnet':
-      rpcUrl = 'https://rpc.testnet.near.org';
+      rpcUrl = 'https://rpc.testnet.pagoda.co';
       break;
     case 'mainnet':
       rpcUrl = 'https://rpc.near.org';

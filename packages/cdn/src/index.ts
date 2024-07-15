@@ -7,8 +7,8 @@ app.use(cors());
 
 const sourceCache = new Map<string, Uint8Array>();
 
-  const provider = new JsonRpcProvider({ url: 'https://rpc.testnet.near.org' });
 const query = async (method: string, accountId: string, filename: string, part?: number, application?: string) => {
+  const provider = new JsonRpcProvider({ url: 'https://rpc.testnet.pagoda.co' });
 
   // @ts-expect-error FIXME typing
   const { result } = await provider.query<{ result: Buffer }>({
