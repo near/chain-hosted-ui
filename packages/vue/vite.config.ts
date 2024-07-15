@@ -1,5 +1,6 @@
 import { defineConfig, type PluginOption } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import gzipPlugin from 'rollup-plugin-gzip';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 import BOSConfig from './bos.json' assert { type: 'json' };
@@ -9,11 +10,11 @@ const { deployerAccount, fileServerUrl } = environments.testnet;
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), visualizer() as PluginOption, {
+  plugins: [vue(), visualizer() as PluginOption, gzipPlugin(), {
     name: 'inject-bundle-url',
     apply: 'build',
     transformIndexHtml(html ) {
-      return html.replace(/(href|src)="\/assets\//g, `$1="${fileServerUrl}/${deployerAccount}/`);
+      return html.replace(/(href|src)="\/assets\/([^"]+)/g, `$1="/${deployerAccount}/$2`);
     }
   }],
   build: {
@@ -22,17 +23,6 @@ export default defineConfig({
         manualChunks: function (id, x) {
           if (id.includes('BosRoot')) {
             return 'preset';
-          }
-
-          if (filePathMatchers.some((m) => id.includes(m))) {
-            return 'dev';
-          }
-
-          if (id.match(/\/node_modules\/[^/]+\/@vue/g)) {
-            const depRootIndex = id.indexOf('/@vue');
-            if (depRootIndex > -1) {
-              return id.slice(depRootIndex + 1);
-            }
           }
         },
       },

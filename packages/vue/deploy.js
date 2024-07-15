@@ -10,6 +10,8 @@ import BOSConfig from './bos.json' assert { type: 'json' };
 
 const { environments } = BOSConfig
 
+const PARTITION_SIZE = 100_000;
+
 async function deployAssets() {
   const [,, network] = process.argv;
   const { rpcUrl, fileContract, deployerAccount } = environments[network || 'testnet'];
@@ -21,23 +23,34 @@ async function deployAssets() {
     deployerAccount
   );
 
-  const filePaths = fs.readdirSync('./dist/assets', { recursive: true })
-    .filter((e) => e.endsWith('.js') || e.endsWith('.css')) // TODO why isn't dirent.isFile() working here?
-    .map((p) => p.replace('dist/assets/', ''))
+  const filePaths = fs.readdirSync('./dist', { recursive: true })
+    .filter((e) => e.endsWith('.js.gz') || e.endsWith('.css.gz') || e.endsWith('.html')) // TODO why isn't dirent.isFile() working here?
+    .map((p) => p.replace('dist/', ''))
 
-  await Promise.all(filePaths
-    .map((filename) => {
-      deployer.functionCall({
+  for (let filename of filePaths) {
+    const bundleBinary = fs.readFileSync(`./dist/${filename}`).toString('base64');
+    filename = filename.replace('assets/', '').replace('.gz', '');
+    let i = 0;
+    const partitions = Math.ceil(bundleBinary.length / PARTITION_SIZE);
+    console.log(`uploading ${filename} in ${partitions} parts...`)
+    while (i < partitions) {
+      const bytes = bundleBinary.slice(i * PARTITION_SIZE, (i * PARTITION_SIZE) + PARTITION_SIZE);
+      console.log(`part ${i+1} (${bytes.length})...`)
+      await deployer.functionCall({
         contractId: fileContract,
         methodName: 'upload_file',
         args: {
-          account_id: deployerAccount,
           filename,
-          bytes: fs.readFileSync(`./dist/assets/${filename}`).toString('utf-8').trim(),
+          bytes,
+          part: i,
+          totalParts: partitions,
         },
         gas: BigInt('300000000000000'),
-      })
-    }));
+      });
+      i++;
+      console.log(`part ${i} uploaded!`)
+    }
+  }
 }
 
 deployAssets().catch((e) => console.error(e));

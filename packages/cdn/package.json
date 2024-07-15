@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -w -p tsconfig.json",
-    "dev": "concurrently \"pnpm build\" \"pnpm serve\"",
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -w -p tsconfig.json",
+    "dev": "concurrently \"pnpm build:watch\" \"pnpm serve\"",
     "serve": "nodemon dist/index.js"
   },
   "keywords": [],
