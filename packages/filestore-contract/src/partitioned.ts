@@ -6,6 +6,11 @@ import {
   UnorderedMap,
 } from "near-sdk-js";
 
+interface FileSet {
+  files: string[];
+  storageSize: number;
+}
+
 class Application {
   currentVersion: number = 0;
   nextVersion: number | null = null;
@@ -13,6 +18,8 @@ class Application {
   nextFiles: string[] = [];
   previousFiles: string[] = [];
 }
+
+const BLANK_APPLICATION_BYTES = 65; // includes key prefix; just add app name length
 
 @NearBindgen({})
 class StatusMessage {
@@ -25,13 +32,24 @@ class StatusMessage {
     this.partitions = new UnorderedMap("parts");
   }
 
-  buildApplicationKey(application: string, account: string, ) {}
+  buildApplicationKey(application: string, account: string, ) {
+    return `${account}/${application}`;
+  }
+
+  buildFileSet(app: Application | null, files: string[]) {
+    return files.reduce((fileSet: FileSet, f: string) => {
+      const file = `v${app?.nextVersion || 1}_${f}`;
+      fileSet.storageSize += file.length;
+      fileSet.files.push(file);
+      return fileSet;
+    }, { files: [], storageSize: 0 });
+  }
 
   startDeployment({ app, account_id, application, files }: { app: Application, account_id: string, application: string, files: string[] }) {
     app.nextVersion = app.currentVersion + 1;
-    // @ts-ignore
-    app.nextFiles = files.map((f: string) => `v${app.nextVersion}_${f}`);
-    this.applications.set(`${account_id}/${application}`, app);
+    const { files: nextFiles } = this.buildFileSet(app, files);
+    app.nextFiles = nextFiles;
+    this.applications.set(this.buildApplicationKey(application, account_id), app);
   }
 
   completeDeployment({ app, account_id, application }: { app: Application, account_id: string, application: string }) {
@@ -41,14 +59,24 @@ class StatusMessage {
     app.nextFiles = [];
     app.currentVersion = app.nextVersion!;
     app.nextVersion = null;
-    this.applications.set(`${account_id}/${application}`, app)
+    this.applications.set(this.buildApplicationKey(application, account_id), app)
   }
 
-  completeFileUpload({ account_id, application, filename }: { account_id: string, application: string, filename: string }) {
-    const app = this.applications.get(`${account_id}/${application}`);
-    // @ts-ignore
-    app.nextFiles = app.nextFiles.filter((f: string) => f === filename);
-    this.applications.set(application, app);
+  /**
+   * Determine cost (in yoctoNear) for storing an application
+   */
+  @view({})
+  calculate_application_storage_cost({ account_id, application, files, fileBytes, partitionCount }: { account_id: string, application: string, files: string[], fileBytes: number, partitionCount: number }): bigint {
+    const appKey = this.buildApplicationKey(application, account_id);
+    const app = this.applications.get(appKey);
+    const fileKeyBytes = this.buildFileSet(app, files).storageSize * 2;
+    const fileKeyPrefixBytes = partitionCount * 20;
+    let appBytes = fileKeyPrefixBytes + fileKeyBytes + fileBytes;
+    if (!app) {
+      appBytes += BLANK_APPLICATION_BYTES + appKey.length;
+    }
+
+    return BigInt(appBytes) * BigInt(1e19);
   }
 
   /**
@@ -150,7 +178,7 @@ class StatusMessage {
    */
   @call({})
   deploy_application({ application, files }: { application: string, files: string[] }) {
-    const appKey = `${near.signerAccountId()}/${application}`
+    const appKey = this.buildApplicationKey(application, near.signerAccountId());
     let app = this.applications.get(appKey);
     if (!app) {
       app = new Application();
@@ -194,13 +222,12 @@ class StatusMessage {
 
     const fileKey = `v${app.nextVersion}_${near.signerAccountId()}/${application}/${filename}`;
     if (!this.filemap.get(fileKey)) {
+      const keyStorageBytes = fileKey.length + 7;
       this.filemap.set(fileKey, totalParts);
     }
 
+    const partitionStorageBytes = `${fileKey}-${part}`.length + bytes.length + 6;
     this.partitions.set(`${fileKey}-${part}`, bytes);
-    if (part === totalParts) {
-      this.completeFileUpload({ account_id: near.signerAccountId(), application, filename });
-    }
   }
 
 
