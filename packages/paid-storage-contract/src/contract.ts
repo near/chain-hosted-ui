@@ -17,6 +17,8 @@ import {
   view,
 } from "near-sdk-js";
 
+import { assert_one_yocto } from "./utils";
+
 const ACCOUNTS_MAP_PREFIX = "chain-deployed-ui";
 
 @NearBindgen({})
@@ -32,32 +34,26 @@ class UserStorage implements StorageManagement {
     account_id,
     registration_only,
   }: {
-    account_id: AccountId;
-    registration_only: boolean;
+    account_id?: AccountId;
+    registration_only?: boolean;
   }): StorageBalance {
     const amount: Balance = near.attachedDeposit();
     account_id = account_id ?? near.predecessorAccountId();
 
     assert(amount > 0, "Deposit amount must be greater than zero");
 
-    // Initialize balance if account does not exist
     if (!this.accounts.containsKey(account_id)) {
       this.accounts.set(account_id, { total: 0n, available: 0n });
     }
 
-    // Calculate new total balance
-    const currentValues = this.accounts.get(account_id);
-    this.accounts.set(account_id, {
-      ...currentValues,
-      total: currentValues.total + amount,
-    });
-
-    if (!registration_only) {
-      // Increase available balance if not just registration
+    if (registration_only) {
+      // TODO - spend on the account creation and refund the rest
+    } else {
       const currentValues = this.accounts.get(account_id);
+      const incrementAmount = amount; // TODO - deduct the account creation if was any
       this.accounts.set(account_id, {
-        ...currentValues,
-        available: currentValues.available + amount,
+        total: currentValues.total + incrementAmount,
+        available: currentValues.available + incrementAmount,
       });
     }
 
@@ -66,21 +62,24 @@ class UserStorage implements StorageManagement {
 
   @call({})
   storage_withdraw({ amount }: { amount?: bigint }): StorageBalance {
-    if (!amount) {
-      throw Error("The amount should be greater than zero");
-    }
-
     amount = BigInt(amount);
+    assert_one_yocto();
 
     const predecessor_account_id = near.predecessorAccountId();
 
     const storage_balance = this.internal_storage_balance_of(
       predecessor_account_id
     );
-    if (storage_balance) {
-      if (amount > storage_balance.available) {
-        throw Error("The amount is greater than the available storage balance");
-      }
+
+    if (!storage_balance) {
+      throw Error(`The account ${predecessor_account_id} is not registered`);
+    }
+
+    if (amount > storage_balance.available) {
+      throw Error("The amount is greater than the available storage balance");
+    }
+
+    if (amount) {
       this.accounts.set(
         predecessor_account_id,
         new StorageBalance(
@@ -88,37 +87,42 @@ class UserStorage implements StorageManagement {
           storage_balance.available - amount
         )
       );
-
-      NearPromise.new(predecessor_account_id).transfer(amount);
-
-      return this.accounts.get(predecessor_account_id);
     } else {
-      throw Error(`The account ${predecessor_account_id} is not registered`);
+      this.accounts.remove(predecessor_account_id);
     }
+
+    NearPromise.new(predecessor_account_id).transfer(
+      amount || storage_balance.available
+    );
+
+    return this.accounts.get(predecessor_account_id);
   }
 
   storage_unregister({ force }: { force: boolean }): boolean {
+    // TODO - handle the force = true case
+    assert_one_yocto();
     const predecessor_account_id = near.predecessorAccountId();
 
     const storage_balance = this.internal_storage_balance_of(
       predecessor_account_id
     );
-    if (storage_balance) {
-      if (storage_balance.available) {
-        NearPromise.new(predecessor_account_id).transfer(
-          storage_balance.available
-        );
-      }
 
-      this.accounts.remove(predecessor_account_id);
-
-      return true;
-    } else {
+    if (!storage_balance) {
       return false;
     }
+
+    if (storage_balance.available) {
+      NearPromise.new(predecessor_account_id).transfer(
+        storage_balance.available
+      );
+    }
+
+    this.accounts.remove(predecessor_account_id);
+
+    return true;
   }
 
-  @call({})
+  @view({})
   storage_balance_of({
     account_id,
   }: {
