@@ -52,8 +52,8 @@ class UserStorage implements StorageManagement {
     account_id,
     registration_only,
   }: {
-    account_id?: AccountId;
-    registration_only?: boolean;
+    account_id: Option<AccountId>;
+    registration_only: Option<boolean>;
   }): StorageBalance {
     const amount: Balance = near.attachedDeposit();
     account_id = account_id ?? near.predecessorAccountId();
@@ -102,7 +102,7 @@ class UserStorage implements StorageManagement {
   }
 
   @call({})
-  storage_withdraw({ amount }: { amount?: bigint }): StorageBalance {
+  storage_withdraw({ amount }: { amount: Option<bigint> }): StorageBalance {
     amount = BigInt(amount);
     assert_one_yocto();
 
