@@ -33,7 +33,7 @@ class UserStorage implements StorageManagement {
     registration_only,
   }: {
     account_id: AccountId;
-    registration_only?: boolean;
+    registration_only: boolean;
   }): StorageBalance {
     const amount: Balance = near.attachedDeposit();
     account_id = account_id ?? near.predecessorAccountId();
@@ -118,7 +118,7 @@ class UserStorage implements StorageManagement {
     }
   }
 
-  @view({})
+  @call({})
   storage_balance_of({
     account_id,
   }: {
