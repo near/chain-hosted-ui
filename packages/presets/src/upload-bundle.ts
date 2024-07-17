@@ -33,8 +33,17 @@ export async function deployFiles() {
   const distPath = path.resolve(process.env.PWD as string, basePath);
   const filePaths = fs.readdirSync(distPath, { recursive: true })
     .map((f) => f.toString())
-    .filter((e) => (e.endsWith('.gz') || e.endsWith('.html')) && !e.endsWith('.html.gz'));
-  const contentPaths = filePaths.map((f) => `${deployerAccount}/${application}/${f.replace(/\.gz$/, '')}`);
+    .filter((e) => (e.endsWith('.gz') || e.endsWith('.html')) && !e.endsWith('.html.gz'))
+    .reduce((files: unknown[], filename) => {
+      const fileContents = fs.readFileSync(path.resolve(distPath, filename)).toString('base64');
+      files.push({
+        contentPath: `${deployerAccount}/${application}/${filename.replace(/\.gz$/, '')}`,
+        fileContents,
+        filename: filename.replace(/\.gz$/, ''),
+        totalPartitions: Math.ceil(fileContents.length / PARTITION_SIZE),
+      });
+      return files;
+    }, []);
 
   if (isLiveRun === true) {
     await deployer.functionCall({
