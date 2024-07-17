@@ -10,12 +10,15 @@ import {
   LookupMap,
   NearBindgen,
   NearPromise,
-  ONE_NEAR,
+  StorageUsage,
   assert,
   call,
+  initialize,
   near,
   view,
 } from "near-sdk-js";
+
+import { assert_one_yocto } from "./utils";
 
 const ACCOUNTS_MAP_PREFIX = "chain-deployed-ui";
 
@@ -23,8 +26,25 @@ const ACCOUNTS_MAP_PREFIX = "chain-deployed-ui";
 class UserStorage implements StorageManagement {
   accounts: LookupMap<StorageBalance>;
 
+  account_storage_usage: StorageUsage;
+
   constructor() {
     this.accounts = new LookupMap(ACCOUNTS_MAP_PREFIX);
+    this.account_storage_usage = 0n;
+  }
+
+  @initialize({ privateFunction: true })
+  init() {
+    this.measure_account_storage_usage();
+    return this;
+  }
+
+  measure_account_storage_usage() {
+    let initial_storage_usage: bigint = near.storageUsage();
+    let tmp_account_id: string = "a".repeat(64);
+    this.accounts.set(tmp_account_id, new StorageBalance(0n, 0n));
+    this.account_storage_usage = near.storageUsage() - initial_storage_usage;
+    this.accounts.remove(tmp_account_id);
   }
 
   @call({ payableFunction: true })
@@ -32,93 +52,116 @@ class UserStorage implements StorageManagement {
     account_id,
     registration_only,
   }: {
-    account_id: AccountId;
-    registration_only: boolean;
+    account_id: Option<AccountId>;
+    registration_only: Option<boolean>;
   }): StorageBalance {
     const amount: Balance = near.attachedDeposit();
     account_id = account_id ?? near.predecessorAccountId();
 
     assert(amount > 0, "Deposit amount must be greater than zero");
 
-    // Initialize balance if account does not exist
-    if (!this.accounts.containsKey(account_id)) {
-      this.accounts.set(account_id, { total: 0n, available: 0n });
-    }
+    if (this.accounts.containsKey(account_id)) {
+      if (registration_only) {
+        near.log!("The account is already registered, refunding the deposit");
+        NearPromise.new(near.predecessorAccountId()).transfer(amount);
+      } else {
+        const currentValues = this.accounts.get(account_id);
+        this.accounts.set(
+          account_id,
+          new StorageBalance(
+            currentValues.total + amount,
+            currentValues.available + amount
+          )
+        );
+      }
+    } else {
+      let min_balance: Balance = this.storage_balance_bounds().min;
+      if (amount < min_balance) {
+        throw Error(
+          "The attached deposit is less than the minimum storage balance"
+        );
+      }
 
-    // Calculate new total balance
-    const currentValues = this.accounts.get(account_id);
-    this.accounts.set(account_id, {
-      ...currentValues,
-      total: currentValues.total + amount,
-    });
+      const availableAmount: Balance = amount - min_balance;
+      if (registration_only) {
+        this.accounts.set(account_id, new StorageBalance(min_balance, 0n));
 
-    if (!registration_only) {
-      // Increase available balance if not just registration
-      const currentValues = this.accounts.get(account_id);
-      this.accounts.set(account_id, {
-        ...currentValues,
-        available: currentValues.available + amount,
-      });
+        if (availableAmount > 0) {
+          NearPromise.new(near.predecessorAccountId()).transfer(
+            availableAmount
+          );
+        }
+      } else {
+        this.accounts.set(
+          account_id,
+          new StorageBalance(amount, availableAmount)
+        );
+      }
     }
 
     return this.accounts.get(account_id);
   }
 
   @call({})
-  storage_withdraw({ amount }: { amount?: bigint }): StorageBalance {
-    if (!amount) {
-      throw Error("The amount should be greater than zero");
-    }
-
+  storage_withdraw({ amount }: { amount: Option<bigint> }): StorageBalance {
     amount = BigInt(amount);
+    assert_one_yocto();
 
     const predecessor_account_id = near.predecessorAccountId();
 
     const storage_balance = this.internal_storage_balance_of(
       predecessor_account_id
     );
-    if (storage_balance) {
-      if (amount > storage_balance.available) {
-        throw Error("The amount is greater than the available storage balance");
-      }
-      this.accounts.set(
-        predecessor_account_id,
-        new StorageBalance(
-          storage_balance.total - amount,
-          storage_balance.available - amount
-        )
-      );
 
-      NearPromise.new(predecessor_account_id).transfer(amount);
-
-      return this.accounts.get(predecessor_account_id);
-    } else {
+    if (!storage_balance) {
       throw Error(`The account ${predecessor_account_id} is not registered`);
     }
+
+    if (amount > storage_balance.available) {
+      throw Error("The amount is greater than the available storage balance");
+    }
+
+    const refund = amount || storage_balance.available;
+
+    this.accounts.set(
+      predecessor_account_id,
+      new StorageBalance(
+        storage_balance.total - refund,
+        storage_balance.available - refund
+      )
+    );
+
+    NearPromise.new(predecessor_account_id).transfer(refund);
+
+    return this.accounts.get(predecessor_account_id);
   }
 
   storage_unregister({ force }: { force: boolean }): boolean {
+    assert_one_yocto();
     const predecessor_account_id = near.predecessorAccountId();
 
     const storage_balance = this.internal_storage_balance_of(
       predecessor_account_id
     );
-    if (storage_balance) {
-      if (storage_balance.available) {
-        NearPromise.new(predecessor_account_id).transfer(
-          storage_balance.available
-        );
-      }
 
-      this.accounts.remove(predecessor_account_id);
-
-      return true;
-    } else {
+    if (!storage_balance) {
       return false;
     }
+
+    if (storage_balance.available && !force) {
+      throw Error(
+        `The account ${predecessor_account_id} has available balance!`
+      );
+    }
+
+    this.accounts.remove(predecessor_account_id);
+
+    NearPromise.new(predecessor_account_id).transfer(storage_balance.total);
+
+    return true;
   }
 
-  @call({})
+  @view({})
   storage_balance_of({
     account_id,
   }: {
@@ -137,7 +180,7 @@ class UserStorage implements StorageManagement {
 
   @view({})
   storage_balance_bounds(): StorageBalanceBounds {
-    const min = BigInt(Math.round(0.001 * Number(ONE_NEAR))); // 0.001 NEAR as an example minimum
+    const min: Balance = this.account_storage_usage * near.storageByteCost();
     const max = null;
     return new StorageBalanceBounds(min, max);
   }
