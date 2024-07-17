@@ -82,18 +82,19 @@ class UserStorage implements StorageManagement {
         );
       }
 
+      const availableAmount: Balance = amount - min_balance;
       if (registration_only) {
-        this.accounts.set(account_id, new StorageBalance(0n, 0n));
-        let refund: Balance = amount - min_balance;
+        this.accounts.set(account_id, new StorageBalance(min_balance, 0n));
 
-        if (refund > 0) {
-          NearPromise.new(near.predecessorAccountId()).transfer(refund);
+        if (availableAmount > 0) {
+          NearPromise.new(near.predecessorAccountId()).transfer(
+            availableAmount
+          );
         }
       } else {
-        const initialAmount = amount - min_balance;
         this.accounts.set(
           account_id,
-          new StorageBalance(initialAmount, initialAmount)
+          new StorageBalance(amount, availableAmount)
         );
       }
     }
@@ -120,21 +121,17 @@ class UserStorage implements StorageManagement {
       throw Error("The amount is greater than the available storage balance");
     }
 
-    if (amount) {
-      this.accounts.set(
-        predecessor_account_id,
-        new StorageBalance(
-          storage_balance.total - amount,
-          storage_balance.available - amount
-        )
-      );
-    } else {
-      this.accounts.remove(predecessor_account_id);
-    }
+    const refund = amount || storage_balance.available;
 
-    NearPromise.new(predecessor_account_id).transfer(
-      amount || storage_balance.available
+    this.accounts.set(
+      predecessor_account_id,
+      new StorageBalance(
+        storage_balance.total - refund,
+        storage_balance.available - refund
+      )
     );
+
+    NearPromise.new(predecessor_account_id).transfer(refund);
 
     return this.accounts.get(predecessor_account_id);
   }
@@ -159,9 +156,7 @@ class UserStorage implements StorageManagement {
 
     this.accounts.remove(predecessor_account_id);
 
-    NearPromise.new(predecessor_account_id).transfer(
-      this.storage_balance_bounds().min
-    );
+    NearPromise.new(predecessor_account_id).transfer(storage_balance.total);
 
     return true;
   }
