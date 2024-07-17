@@ -156,7 +156,10 @@ class UserStorage implements StorageManagement {
 
     this.accounts.remove(predecessor_account_id);
 
-    NearPromise.new(predecessor_account_id).transfer(storage_balance.total);
+    const min_balance: Balance = this.storage_balance_bounds().min;
+    const refund = storage_balance.total >= min_balance ? min_balance : storage_balance.total;
+
+    NearPromise.new(predecessor_account_id).transfer(refund);
 
     return true;
   }
