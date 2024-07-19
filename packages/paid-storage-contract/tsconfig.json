@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "target": "es2020",
+    "module": "esnext",
+    "noEmit": true,
+    "noImplicitAny": false,
+    "outDir": "lib",
+    "moduleResolution": "node"
+  },
+  "files": ["src/contract.ts"],
+  "exclude": ["node_modules"]
+}
