@@ -102,7 +102,7 @@ class UserStorage implements StorageManagement {
     return this.accounts.get(account_id);
   }
 
-  @call({})
+  @call({ payableFunction: true })
   storage_withdraw({ amount }: { amount: Option<bigint> }): StorageBalance {
     amount = BigInt(amount);
     assert_one_yocto();
@@ -136,6 +136,7 @@ class UserStorage implements StorageManagement {
     return this.accounts.get(predecessor_account_id);
   }
 
+  @call({ payableFunction: true })
   storage_unregister({ force }: { force: boolean }): boolean {
     assert_one_yocto();
     const predecessor_account_id = near.predecessorAccountId();
