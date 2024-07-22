@@ -320,8 +320,10 @@ class UserStorage implements StorageManagement {
   list_authors(): string[] {
     // @ts-ignore
     return Object.keys(this.filemap.keys({}).reduce((authors: any, file: string) => {
-      // @ts-ignore
-      authors[file.split('/')[0]] = true;
+      const versionAuthorTokens = file.split('/')[0].split('_');
+      versionAuthorTokens.shift();
+      const author = versionAuthorTokens.join('_');
+      authors[author] = true;
       return authors;
     }, {}));
   }
