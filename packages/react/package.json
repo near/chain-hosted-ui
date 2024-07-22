@@ -8,8 +8,8 @@
     "build": "tsc && vite build",
     "deploy": "pnpm build && pnpm upload",
     "clean-deploy": "pnpm delete-app && pnpm upload",
-    "upload": "pnpm upload-bundle ./dist testnet pfs1.testnet gornt.testnet $npm_package_bosConfig_application",
-    "delete-app": "pnpm delete-application testnet pfs1.testnet gornt.testnet $npm_package_bosConfig_application",
+    "upload": "pnpm upload-bundle ./dist testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
+    "delete-app": "pnpm delete-application testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -36,7 +36,9 @@
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
   },
-  "bosConfig": {
-    "application": "react-vite-example"
+  "nearDeployConfig": {
+    "application": "react-vite-example",
+    "deployerAccount": "gornt.near",
+    "filestoreContract": "pfs1.testnet"
   }
 }

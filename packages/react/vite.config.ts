@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import gzipPlugin from 'rollup-plugin-gzip';
 import { visualizer } from 'rollup-plugin-visualizer';
 
-import { bosConfig } from './package.json';
+import { nearDeployConfig } from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,7 +13,7 @@ export default defineConfig({
     name: 'inject-bundle-url',
     apply: 'build',
     transformIndexHtml(html ) {
-      return replaceHtmlPaths(html, bosConfig.application);
+      return replaceHtmlPaths(html, nearDeployConfig.application);
     }
   }],
   define: {
