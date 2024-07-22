@@ -38,7 +38,7 @@
   },
   "nearDeployConfig": {
     "application": "react-vite-example",
-    "deployerAccount": "gornt.near",
+    "deployerAccount": "gornt.testnet",
     "filestoreContract": "pfs1.testnet"
   }
 }
