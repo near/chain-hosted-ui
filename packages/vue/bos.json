@@ -1,7 +1,7 @@
 {
   "environments": {
     "testnet": {
-      "rpcUrl": "https://rpc.testnet.near.org",
+      "rpcUrl": "https://rpc.testnet.pagoda.co",
       "fileContract": "partfs1.testnet",
       "deployerAccount": "gormp.testnet",
       "fileServerUrl": "http://localhost:3003"

@@ -7,19 +7,20 @@ app.use(cors());
 
 const sourceCache = new Map<string, Uint8Array>();
 
-const query = async (method: string, accountId: string, filename: string, part?: number) => {
-  const provider = new JsonRpcProvider({ url: 'https://rpc.testnet.near.org' });
+const query = async (method: string, accountId: string, filename: string, part?: number, application?: string) => {
+  const provider = new JsonRpcProvider({ url: 'https://rpc.testnet.pagoda.co' });
 
   // @ts-expect-error FIXME typing
   const { result } = await provider.query<{ result: Buffer }>({
     request_type: 'call_function',
-    account_id: 'partfs1.testnet',
+    account_id: 'pfs1.testnet',
     method_name: method,
     finality: 'optimistic',
     args_base64: Buffer.from(new TextEncoder().encode(JSON.stringify({
       account_id: accountId,
       filename,
       ...(part !== undefined ? { part } : {}),
+      ...(application !== undefined ? { application } : {}),
     }))).toString('base64')
   });
 
@@ -34,13 +35,11 @@ app.get('/*', async function (req, res) {
   const key = req.path.slice(1);
   let cached: Uint8Array | undefined = sourceCache.get(key);
   console.log(key)
-  const isRootRequest = req.path.endsWith('index.html');
+  const [accountId, application, ...filecomponents] = key.split('/');
+  const filename = filecomponents.filter((c, i) => i === 0 ? c !== application : true).join('/')
   try {
     if (!cached) {
-      const [accountId, ...filecomponents] = key.split('/');
-      const filename = filecomponents.join('/')
-
-      const rawParts = await query('get_parts', accountId!, filename);
+      const rawParts = await query('get_parts', accountId!, filename || 'index.html', undefined, application);
 
       if (!rawParts) {
         res.statusCode = 404;
@@ -52,7 +51,7 @@ app.get('/*', async function (req, res) {
       const requests = (new Array(parts))
         // @ts-ignore
         .fill()
-        .map((_, i) => query('get_partition', accountId!, filename, i));
+        .map((_, i) => query('get_partition', accountId!, filename, i, application));
 
       const partitions = await Promise.all(requests);
 
@@ -61,7 +60,7 @@ app.get('/*', async function (req, res) {
       sourceCache.set(req.path, cached);
     }
   } catch (e: any) {
-    console.error(key, e)
+    console.log({ accountId, application, filename })
     res.send(`error fetching ${key}: ${e.toString()}`);
     return;
   }
@@ -87,7 +86,7 @@ app.get('/*', async function (req, res) {
     return;
   }
 
-  if (req.path.endsWith('.html')) {
+  if (req.path.endsWith('.html') || !filename) {
     res.set('Content-Type', 'text/html');
     res.send(cached!);
     return;

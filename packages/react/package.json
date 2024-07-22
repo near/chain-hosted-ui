@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "deploy": "pnpm build && pnpm upload",
-    "upload": "pnpm upload-bundle ./dist testnet partfs1.testnet gormp.testnet",
+    "clean-deploy": "pnpm delete-app && pnpm upload",
+    "upload": "pnpm upload-bundle ./dist testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
+    "delete-app": "pnpm delete-application testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application 1",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -33,5 +35,10 @@
     "rollup-plugin-visualizer": "^5.12.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
+  },
+  "nearDeployConfig": {
+    "application": "react-vite-example",
+    "deployerAccount": "gornt.testnet",
+    "filestoreContract": "pfs1.testnet"
   }
 }
