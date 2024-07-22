@@ -387,13 +387,13 @@ class UserStorage implements StorageManagement {
   @call({})
   deploy_application({ application, files }: { application: string, files: string[] }) {
     const startingSize = near.storageUsage();
-    const appKey = this.buildApplicationKey(application, near.signerAccountId());
+    const appKey = this.buildApplicationKey(application, near.predecessorAccountId());
     let app = this.applications.get(appKey);
     if (!app) {
       app = new Application();
       this.applications.set(appKey, app);
     }
-    this.startDeployment({ app, account_id: near.signerAccountId(), application, files });
+    this.startDeployment({ app, account_id: near.predecessorAccountId(), application, files });
     const diff = near.storageUsage() - startingSize;
     this.pay_storage_cost(diff);
     return { diff };
@@ -406,9 +406,9 @@ class UserStorage implements StorageManagement {
   @call({})
   post_deploy_cleanup({ application }: { application: string }): { files: string[], diff: bigint } {
     const startingSize = near.storageUsage();
-    const app = this.applications.get(`${near.signerAccountId()}/${application}`)!;
+    const app = this.applications.get(`${near.predecessorAccountId()}/${application}`)!;
     const files = app.currentFiles;
-    this.completeDeployment({ app, account_id: near.signerAccountId(), application });
+    this.completeDeployment({ app, account_id: near.predecessorAccountId(), application });
     const diff = near.storageUsage() - startingSize;
     this.pay_storage_cost(diff);
     return { files, diff };
@@ -438,10 +438,10 @@ class UserStorage implements StorageManagement {
     let diff = -1n;
     let error: string | null = null;
     try {
-      const app = this.applications.get(`${near.signerAccountId()}/${application}`);
+      const app = this.applications.get(`${near.predecessorAccountId()}/${application}`);
       if (!app) {
         // @ts-ignore
-        throw new Error(`no application ${near.signerAccountId()}/${application} - call the "deploy_application" method before uploading file partitions`);
+        throw new Error(`no application ${near.predecessorAccountId()}/${application} - call the "deploy_application" method before uploading file partitions`);
       }
 
       const fileKey = this.buildFileKey(application, near.predecessorAccountId(), filename, app.nextVersion);
