@@ -36,6 +36,7 @@
     }
   },
   "bin": {
-    "upload-bundle": "./dist/upload-bundle.js"
+    "upload-bundle": "./dist/upload-bundle.js",
+    "delete-application": "./dist/delete-application.js"
   }
 }

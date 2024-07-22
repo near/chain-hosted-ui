@@ -17,7 +17,7 @@ export async function deleteApplication() {
       rpcUrl = 'https://rpc.near.org';
       break;
     default:
-      throw new Error('undefined environment')
+      throw new Error(`undefined environment ${network}`)
   }
 
   const provider = new JsonRpcProvider({ url: rpcUrl });
@@ -105,6 +105,7 @@ export async function deleteApplication() {
       },
     });
 
+    console.log(`refunding available balance of ${available}`)
     await deployer.functionCall({
       contractId: fileContract,
       methodName: 'storage_withdraw',
@@ -115,6 +116,7 @@ export async function deleteApplication() {
       gas: BigInt('300000000000000'),
     });
 
+    console.log(`unregistering ${deployerAccount}...`)
     await deployer.functionCall({
       contractId: fileContract,
       methodName: 'storage_unregister',

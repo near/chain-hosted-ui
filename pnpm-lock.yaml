@@ -330,12 +330,6 @@ importers:
       '@mui/material':
         specifier: ^5.15.19
         version: 5.16.4(@emotion/react@11.13.0(@types/react@18.3.2)(react@18.3.1))(@emotion/styled@11.13.0(@emotion/react@11.13.0(@types/react@18.3.2)(react@18.3.1))(@types/react@18.3.2)(react@18.3.1))(@types/react@18.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.2.66
@@ -361,6 +355,12 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.6
         version: 0.4.7(eslint@8.57.0)
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
       rollup-plugin-gzip:
         specifier: ^3.1.2
         version: 3.1.2(rollup@4.18.0)
@@ -6796,6 +6796,25 @@ snapshots:
 
   '@types/w3c-web-usb@1.0.10': {}
 
+  '@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@4.7.4))(eslint@8.57.0)(typescript@4.7.4)':
+    dependencies:
+      '@eslint-community/regexpp': 4.10.0
+      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@5.4.5)
+      '@typescript-eslint/scope-manager': 5.62.0
+      '@typescript-eslint/type-utils': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      debug: 4.3.4(supports-color@5.5.0)
+      eslint: 8.57.0
+      graphemer: 1.4.0
+      ignore: 5.3.1
+      natural-compare-lite: 1.4.0
+      semver: 7.6.2
+      tsutils: 3.21.0(typescript@4.7.4)
+    optionalDependencies:
+      typescript: 4.7.4
+    transitivePeerDependencies:
+      - supports-color
+
   '@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@4.7.4)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
@@ -6862,6 +6881,18 @@ snapshots:
       eslint: 8.57.0
     optionalDependencies:
       typescript: 4.7.4
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.4.5)':
+    dependencies:
+      '@typescript-eslint/scope-manager': 5.62.0
+      '@typescript-eslint/types': 5.62.0
+      '@typescript-eslint/typescript-estree': 5.62.0(typescript@4.7.4)
+      debug: 4.3.4(supports-color@5.5.0)
+      eslint: 8.57.0
+    optionalDependencies:
+      typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
 
@@ -9737,8 +9768,8 @@ snapshots:
       '@rollup/plugin-node-resolve': 13.3.0(rollup@2.79.1)
       '@scure/base': 1.1.6
       '@types/estree': 1.0.5
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@4.7.4)
-      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@4.7.4))(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@5.4.5)
       commander: 9.5.0
       eslint: 8.57.0
       json-schema: 0.4.0
@@ -9799,7 +9830,7 @@ snapshots:
       '@rollup/plugin-node-resolve': 13.3.0(rollup@2.79.1)
       '@scure/base': 1.1.6
       '@types/estree': 1.0.5
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@4.7.4)
+      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.0)(typescript@4.7.4))(eslint@8.57.0)(typescript@4.7.4)
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.0)(typescript@4.7.4)
       commander: 9.5.0
       eslint: 8.57.0
