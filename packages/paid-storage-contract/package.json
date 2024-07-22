@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "near-sdk-js build src/contract.ts build/paid_storage_contract.wasm",
-    "test": "pnpm run build && ava -- ./build/hello_near.wasm"
+    "test": "pnpm run build && ava -- ./build/paid_storage_contract.wasm"
   },
   "dependencies": {
     "near-contract-standards": "^2.0.0",
