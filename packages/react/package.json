@@ -9,7 +9,7 @@
     "deploy": "pnpm build && pnpm upload",
     "clean-deploy": "pnpm delete-app && pnpm upload",
     "upload": "pnpm upload-bundle ./dist testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
-    "delete-app": "pnpm delete-application testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
+    "delete-app": "pnpm delete-application testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application 1",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

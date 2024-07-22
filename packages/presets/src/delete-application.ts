@@ -7,7 +7,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 
 export async function deleteApplication() {
-  const [,, network, fileContract, deployerAccount, application, isLiveRun = true] = process.argv;
+  const [,, network, fileContract, deployerAccount, application, appVersion, isLiveRun = true] = process.argv;
   let rpcUrl;
   switch (network || 'testnet') {
     case 'testnet':
@@ -57,7 +57,7 @@ export async function deleteApplication() {
         contractId: fileContract,
         methodName: 'delete_file',
         args: {
-          appVersion: parseInt(filename.slice(1)),
+          appVersion,
           application,
           filename,
         },
@@ -72,6 +72,10 @@ export async function deleteApplication() {
       console.log(`[${filename}] deleting part ${i}/${parts}...`);
       if (isLive) {
         let remainingParts = await deleteFunctionCall();
+        if (remainingParts === -1) {
+          console.log(`no file entry found for ${filename} v${appVersion} in ${application}`)
+        }
+
         while (remainingParts > 0) {
           console.log(`[${filename}] ${remainingParts} parts remaining to delete...`);
           remainingParts = await deleteFunctionCall();
