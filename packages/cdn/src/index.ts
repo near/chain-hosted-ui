@@ -13,7 +13,7 @@ const query = async (method: string, accountId: string, filename: string, part?:
   // @ts-expect-error FIXME typing
   const { result } = await provider.query<{ result: Buffer }>({
     request_type: 'call_function',
-    account_id: 'partfs1.testnet',
+    account_id: 'pfs1.testnet',
     method_name: method,
     finality: 'optimistic',
     args_base64: Buffer.from(new TextEncoder().encode(JSON.stringify({

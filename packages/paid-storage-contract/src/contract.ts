@@ -21,6 +21,10 @@ import {
 
 import { assert_one_yocto } from "./utils";
 
+interface PartitionedFiles {
+  [key: string]: number;
+}
+
 interface FileSet {
   files: string[];
   storageSize: number;
@@ -100,7 +104,7 @@ class UserStorage implements StorageManagement {
       let min_balance: Balance = this.storage_balance_bounds().min;
       if (amount < min_balance) {
         throw Error(
-          "The attached deposit is less than the minimum storage balance"
+          `The attached deposit is less than the minimum storage balance ${this.storage_balance_bounds().min} yN`
         );
       }
 
@@ -208,14 +212,32 @@ class UserStorage implements StorageManagement {
     return new StorageBalanceBounds(min, max);
   }
 
-  buildApplicationKey(application: string, account: string, ) {
+  pay_storage_cost(bytesDiff: bigint) {
+    const balance = this.internal_storage_balance_of(near.predecessorAccountId());
+
+    const newBalance = balance.available - (bytesDiff * near.storageByteCost());
+    if (newBalance < 0) {
+      throw new Error(`insufficient funds, additional ${-newBalance} required`)
+    }
+
+    this.accounts.set(near.predecessorAccountId(), new StorageBalance(balance.total, newBalance));
+  }
+
+  buildApplicationKey(application: string, account: string) {
     return `${account}/${application}`;
   }
 
-  buildFileSet(app: Application | null, files: string[]) {
+  buildFileKey(application: string, account: string, filename: string, version: number) {
+    return `v${version}_${account}/${application}/${filename}`;
+  }
+
+  buildFileSet(app: Application | null, files: string[], application: string, account: string, partitionedFiles?: PartitionedFiles) {
     return files.reduce((fileSet: FileSet, f: string) => {
-      const file = `v${app?.nextVersion || 1}_${f}`;
+      const file = this.buildFileKey(application, account, f, app?.nextVersion || 1);
       fileSet.storageSize += file.length;
+      if (partitionedFiles) {
+        fileSet.storageSize += 1 + (partitionedFiles[f] || 1);
+      }
       fileSet.files.push(file);
       return fileSet;
     }, { files: [], storageSize: 0 });
@@ -223,13 +245,12 @@ class UserStorage implements StorageManagement {
 
   startDeployment({ app, account_id, application, files }: { app: Application, account_id: string, application: string, files: string[] }) {
     app.nextVersion = app.currentVersion + 1;
-    const { files: nextFiles } = this.buildFileSet(app, files);
+    const { files: nextFiles } = this.buildFileSet(app, files, application, account_id);
     app.nextFiles = nextFiles;
     this.applications.set(this.buildApplicationKey(application, account_id), app);
   }
 
   completeDeployment({ app, account_id, application }: { app: Application, account_id: string, application: string }) {
-    // @ts-ignore
     app.previousFiles = (app?.previousFiles || []).concat(app?.currentFiles || [])
     app.currentFiles = app.nextFiles;
     app.nextFiles = [];
@@ -242,17 +263,26 @@ class UserStorage implements StorageManagement {
    * Determine cost (in yoctoNear) for storing an application
    */
   @view({})
-  calculate_application_storage_cost({ account_id, application, files, fileBytes, partitionCount }: { account_id: string, application: string, files: string[], fileBytes: number, partitionCount: number }): bigint {
+  calculate_application_storage_cost({ account_id, application, partitionedFiles, fileBytes }: { account_id: string, application: string, partitionedFiles: PartitionedFiles, fileBytes: number }) {
     const appKey = this.buildApplicationKey(application, account_id);
     const app = this.applications.get(appKey);
-    const fileKeyBytes = this.buildFileSet(app, files).storageSize * 2;
-    const fileKeyPrefixBytes = partitionCount * 20;
-    let appBytes = fileKeyPrefixBytes + fileKeyBytes + fileBytes;
+    const partitionKeyChars = this.buildFileSet(app, Object.keys(partitionedFiles), application, account_id, partitionedFiles).storageSize;
+    const fileKeyChars = Object.keys(partitionedFiles).reduce((length, f) => length + this.buildFileKey(application, account_id, f, app?.nextVersion || 1).length, 0);
+    let appChars = fileKeyChars + partitionKeyChars + fileBytes;
     if (!app) {
-      appBytes += BLANK_APPLICATION_BYTES + appKey.length;
+      appChars += BLANK_APPLICATION_BYTES + appKey.length;
     }
 
-    return BigInt(appBytes) * BigInt(1e19);
+    return {
+      applicationStorageCost: BigInt(Math.floor(appChars * 1.725)) * near.storageByteCost(),
+      breakdown: {
+        appKey,
+        newAppChars: BLANK_APPLICATION_BYTES + appKey.length,
+        fileKeyChars,
+        partitionKeyChars,
+        fileBytes,
+      }
+    };
   }
 
   /**
@@ -326,7 +356,7 @@ class UserStorage implements StorageManagement {
       throw new Error(`no application ${account_id}/${application}`);
     }
 
-    const filepath = `v${app.currentVersion}_${account_id}/${application}/${filename}`;
+    const filepath = this.buildFileKey(application, account_id, filename, app.currentVersion);
     const file = app.currentFiles.find((f: string) => f === filepath);
     if (!file) {
       throw new Error(`no match for ${filepath} in [${app.currentFiles.join(',')}]`)
@@ -354,6 +384,7 @@ class UserStorage implements StorageManagement {
    */
   @call({})
   deploy_application({ application, files }: { application: string, files: string[] }) {
+    const startingSize = near.storageUsage();
     const appKey = this.buildApplicationKey(application, near.signerAccountId());
     let app = this.applications.get(appKey);
     if (!app) {
@@ -361,6 +392,9 @@ class UserStorage implements StorageManagement {
       this.applications.set(appKey, app);
     }
     this.startDeployment({ app, account_id: near.signerAccountId(), application, files });
+    const diff = near.storageUsage() - startingSize;
+    this.pay_storage_cost(diff);
+    return { diff };
   }
 
   /**
@@ -368,16 +402,23 @@ class UserStorage implements StorageManagement {
    * @param application app to which the file belongs
    */
   @call({})
-  post_deploy_cleanup({ application }: { application: string }): string[] {
+  post_deploy_cleanup({ application }: { application: string }): { files: string[], diff: bigint } {
+    const startingSize = near.storageUsage();
     const app = this.applications.get(`${near.signerAccountId()}/${application}`)!;
     const files = app.currentFiles;
     this.completeDeployment({ app, account_id: near.signerAccountId(), application });
-    return files;
+    const diff = near.storageUsage() - startingSize;
+    this.pay_storage_cost(diff);
+    return { files, diff };
   }
 
   @call({})
-  delete_application({ account_id, application }: { account_id: string, application: string }) {
-    this.applications.remove(`${account_id}/${application}`)
+  delete_application({ application }: { application: string }) {
+    const startingSize = near.storageUsage();
+    this.applications.remove(`${near.predecessorAccountId()}/${application}`)
+    const diff = near.storageUsage() - startingSize;
+    this.pay_storage_cost(diff);
+    return { diff };
   }
 
   /**
@@ -390,20 +431,35 @@ class UserStorage implements StorageManagement {
    */
   @call({})
   upload_file_partition({ application, filename, bytes, part, totalParts }: { application: string, filename: string, bytes: string, part: number, totalParts: number }) {
-    const app = this.applications.get(`${near.signerAccountId()}/${application}`);
-    if (!app) {
-      // @ts-ignore
-      throw new Error(`no application ${near.signerAccountId()}/${application} - call the "deploy_application" method before uploading file partitions`);
-    }
+    const startingSize = near.storageUsage();
+    let ret = { filemapDiff: 0n, partitionsDiff: 0n };
+    let diff = -1n;
+    let error: string | null = null;
+    try {
+      const app = this.applications.get(`${near.signerAccountId()}/${application}`);
+      if (!app) {
+        // @ts-ignore
+        throw new Error(`no application ${near.signerAccountId()}/${application} - call the "deploy_application" method before uploading file partitions`);
+      }
 
-    const fileKey = `v${app.nextVersion}_${near.signerAccountId()}/${application}/${filename}`;
-    if (!this.filemap.get(fileKey)) {
-      const keyStorageBytes = fileKey.length + 7;
-      this.filemap.set(fileKey, totalParts);
-    }
+      const fileKey = this.buildFileKey(application, near.predecessorAccountId(), filename, app.nextVersion);
+      if (!this.filemap.get(fileKey)) {
+        this.filemap.set(fileKey, totalParts);
+        ret.filemapDiff = near.storageUsage() - startingSize;
+      }
 
-    const partitionStorageBytes = `${fileKey}-${part}`.length + bytes.length + 6;
-    this.partitions.set(`${fileKey}-${part}`, bytes);
+      this.partitions.set(`${fileKey}-${part}`, bytes);
+      diff = near.storageUsage() - startingSize;
+      ret.partitionsDiff = diff - ret.filemapDiff;
+      this.pay_storage_cost(diff);
+    } catch (e) {
+      if (diff < 0n) {
+        diff = near.storageUsage() - startingSize;
+      }
+      error = e.toString()
+    } finally {
+      return { diff, error, ...ret };
+    }
   }
 
 
@@ -412,11 +468,12 @@ class UserStorage implements StorageManagement {
    * @param filename name of the file
    */
   @call({})
-  delete_file({ appVersion, application, filename, partsToDelete }: { appVersion: string, application: string, filename: string, partsToDelete?: number }): { remainingParts: number } {
-    const fileKey = `v${appVersion}_${near.signerAccountId()}/${application}/${filename}`;
+  delete_file({ appVersion, application, filename, partsToDelete }: { appVersion: string, application: string, filename: string, partsToDelete?: number }): { remainingParts: number, diff: bigint } {
+    const startingSize = near.storageUsage();
+    const fileKey = this.buildFileKey(application, near.predecessorAccountId(), filename, +appVersion);
     const parts = this.filemap.get(fileKey);
     if (parts === null) {
-      return { remainingParts: -1 }
+      return { remainingParts: -1, diff: 0n }
     }
 
     const MAX_PARTS = 3;
@@ -433,6 +490,8 @@ class UserStorage implements StorageManagement {
       this.filemap.set(fileKey, remainingParts);
     }
 
-    return { remainingParts }
+    const diff = near.storageUsage() - startingSize;
+    this.pay_storage_cost(diff);
+    return { remainingParts, diff }
   }
 }
