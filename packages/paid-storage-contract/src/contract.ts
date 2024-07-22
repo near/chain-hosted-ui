@@ -274,7 +274,7 @@ class UserStorage implements StorageManagement {
     }
 
     return {
-      applicationStorageCost: BigInt(Math.floor(appChars * 1.725)) * near.storageByteCost(),
+      applicationStorageCost: BigInt(Math.floor(appChars * 1.01)) * near.storageByteCost(),
       breakdown: {
         appKey,
         newAppChars: BLANK_APPLICATION_BYTES + appKey.length,
