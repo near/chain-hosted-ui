@@ -203,8 +203,8 @@ export function calculateApplicationDeploymentCost({deployer, fileContract, appl
   });
 }
 
-export function depositDeploymentStorageCost({ deployer, fileContract, applicationStorageCost }: { deployer: Account, fileContract: string, applicationStorageCost: number }) {
-  return deployer.functionCall({
+export async function depositDeploymentStorageCost({ deployer, fileContract, applicationStorageCost }: { deployer: Account, fileContract: string, applicationStorageCost: number }) {
+  const depositResult = await deployer.functionCall({
     contractId: fileContract,
     methodName: 'storage_deposit',
     args: {
@@ -214,6 +214,8 @@ export function depositDeploymentStorageCost({ deployer, fileContract, applicati
     attachedDeposit: BigInt(applicationStorageCost),
     gas: 300000000000000n,
   });
+
+  return getTransactionLastResult(depositResult);
 }
 
 export async function deployApplication({ deployer, fileContract, application, files }: { deployer: Account, fileContract: string, application: string, files: string[] }) {

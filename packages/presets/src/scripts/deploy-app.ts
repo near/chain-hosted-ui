@@ -35,7 +35,7 @@ function aggregateBundle(deployerAccount: string, application: string, basePath:
     }, { files: [], aggregated: { totalBytes: 0, totalPartitions: 0 } });
 }
 
-export async function deployApplication() {
+export async function deployApp() {
   const [,, basePath, network, fileContract, deployerAccount, application, isLiveRun = true] = process.argv;
   const deployer = getAccount({ accountId: deployerAccount, network });
 
@@ -63,4 +63,4 @@ export async function deployApplication() {
   }
 }
 
-deployApplication().catch((e) => console.error(e));
+deployApp().catch((e) => console.error(e));
