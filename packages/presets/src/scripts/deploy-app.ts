@@ -3,9 +3,11 @@ import * as path from 'node:path';
 import {
   calculateApplicationDeploymentCost,
   deployApplication,
+  getApplication,
   depositDeploymentStorageCost,
-  getAccount, PARTITION_SIZE, postDeployCleanup, uploadFile,
+  getAccount, PARTITION_SIZE, postDeployCleanup, uploadFile, withdrawAvailableBalance, deleteFiles,
 } from './utils';
+import { formatNearAmount } from '@near-js/utils';
 
 interface BundleAsset {
   contentPath: string;
@@ -42,7 +44,7 @@ export async function deployApp() {
   const { files, aggregated: { totalBytes, totalPartitions } } = aggregateBundle(deployerAccount, application, basePath);
   const { applicationStorageCost, breakdown } = await calculateApplicationDeploymentCost({ deployer, application, files, totalBytes, fileContract });
 
-  console.log(`${application} deployment calculated to cost ${applicationStorageCost} yN`, breakdown)
+  console.log(`${application} deployment calculated to cost ${formatNearAmount(applicationStorageCost)} N`, breakdown)
 
   const isLive = isLiveRun === true;
   if (isLive) {
@@ -59,7 +61,11 @@ export async function deployApp() {
   console.log(`all files uploaded for ${application}, beginning post-deploy actions`)
   if (isLive) {
     const cleanupResult = await postDeployCleanup({ deployer, fileContract, application });
-    console.log({ cleanupResult });
+    console.log('deployment completed', { cleanupResult });
+
+    await deleteFiles({ deployer, fileContract, application, isLive })
+
+    await withdrawAvailableBalance({ deployer, fileContract });
   }
 }
 

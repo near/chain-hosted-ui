@@ -459,21 +459,24 @@ class UserStorage implements StorageManagement {
         diff = near.storageUsage() - startingSize;
       }
       error = e.toString()
-    } finally {
-      return { diff, error, ...ret };
     }
-  }
 
+    return { diff, error, ...ret };
+  }
 
   /**
    * Delete all entries for the specified file
    * @param filename name of the file
    */
   @call({})
-  delete_file({ appVersion, application, filename, partsToDelete }: { appVersion: string, application: string, filename: string, partsToDelete?: number }): { remainingParts: number, diff: bigint } {
+  delete_file({ application, filepath, partsToDelete }: { application: string, filepath: string, partsToDelete?: number }): { remainingParts: number, diff: bigint } {
     const startingSize = near.storageUsage();
-    const fileKey = this.buildFileKey(application, near.predecessorAccountId(), filename, +appVersion);
-    const parts = this.filemap.get(fileKey);
+    const fileOwner = filepath.split('_').slice(1).join('_').split('/')[0];
+    if (near.predecessorAccountId() !== fileOwner) {
+      throw Error(`${near.predecessorAccountId()} cannot delete file ${filepath} owned by ${fileOwner}`);
+    }
+
+    const parts = this.filemap.get(filepath);
     if (parts === null) {
       return { remainingParts: -1, diff: 0n }
     }
@@ -482,14 +485,20 @@ class UserStorage implements StorageManagement {
     const isPartialDelete = parts > (partsToDelete || MAX_PARTS);
     let i = parts;
     while (i >= (isPartialDelete ? parts - (partsToDelete || MAX_PARTS) : 0)) {
-      this.partitions.remove(`${fileKey}-${--i}`);
+      this.partitions.remove(`${filepath}-${--i}`);
     }
 
     const remainingParts = i + 1;
     if (!isPartialDelete) {
-      this.filemap.remove(fileKey);
+      this.filemap.remove(filepath);
+      const appKey = this.buildApplicationKey(application, near.predecessorAccountId());
+      const app = this.applications.get(appKey);
+      if (app) {
+        app.previousFiles = app.previousFiles.filter((f) => f !== filepath);
+        this.applications.set(appKey, app);
+      }
     } else {
-      this.filemap.set(fileKey, remainingParts);
+      this.filemap.set(filepath, remainingParts);
     }
 
     const diff = near.storageUsage() - startingSize;

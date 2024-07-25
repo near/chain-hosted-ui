@@ -1,4 +1,4 @@
-import { deleteApplication, deleteFile, getAccount, listAppFiles, unregister } from './utils';
+import { deleteApplication, deleteFile, getAccount, listAppFiles, unregister, withdrawAvailableBalance } from './utils';
 
 export async function deleteApplicationAndUnregister() {
   const [,, network, fileContract, deployerAccount, application, appVersion, isLiveRun = true] = process.argv;
@@ -8,13 +8,14 @@ export async function deleteApplicationAndUnregister() {
   console.log(`[${application}] deleting: ${files.join(', ')}`)
 
   const isLive = isLiveRun === true;
-  for (let filename of files) {
-    console.log(`deleting ${filename}...`);
-    await deleteFile({ deployer, fileContract, application, appVersion: +appVersion, isLive, filename: filename.split('/').slice(2).join('/') });
+  for (let filepath of files) {
+    console.log(`deleting ${filepath}...`);
+    await deleteFile({ deployer, application, fileContract, isLive, filepath });
   }
 
   if (isLive) {
     await deleteApplication({ application, deployer, fileContract });
+    await withdrawAvailableBalance({ deployer, fileContract });
     await unregister({ deployer, fileContract });
   }
 }

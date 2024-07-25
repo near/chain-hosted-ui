@@ -4,7 +4,7 @@ import { Account } from '@near-js/accounts';
 import { UnencryptedFileSystemKeyStore } from '@near-js/keystores-node';
 import { JsonRpcProvider } from '@near-js/providers';
 import { InMemorySigner } from '@near-js/signers';
-import { getTransactionLastResult } from '@near-js/utils';
+import { formatNearAmount, getTransactionLastResult } from '@near-js/utils';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
@@ -19,12 +19,14 @@ interface ListAppFilesParams {
   application: string;
 }
 
-interface DeleteFileParams {
+interface DeleteFileParams extends DeleteFilesParams {
+  filepath: string;
+}
+
+interface DeleteFilesParams {
   deployer: Account;
   fileContract: string;
   application: string;
-  filename: string;
-  appVersion: number;
   isLive: boolean;
 }
 
@@ -87,25 +89,14 @@ export function listAppFiles({deployer, fileContract, application}: ListAppFiles
   });
 }
 
-export async function deleteFile({deployer, fileContract, application, filename, appVersion, isLive}: DeleteFileParams) {
-  const parts: number = await deployer.viewFunction({
-    contractId: fileContract,
-    methodName: 'get_parts',
-    args: {
-      account_id: deployer.accountId,
-      application,
-      filename,
-    },
-  });
-
+export async function deleteFile({deployer, fileContract, application, filepath, isLive}: DeleteFileParams) {
   const deleteFunctionCall = async () => {
     const result = await deployer.functionCall({
       contractId: fileContract,
       methodName: 'delete_file',
       args: {
-        appVersion,
         application,
-        filename,
+        filepath,
       },
       gas: 300000000000000n,
     });
@@ -113,19 +104,28 @@ export async function deleteFile({deployer, fileContract, application, filename,
     return getTransactionLastResult(result).remainingParts as number;
   };
 
-  let i = 0;
-  while (i++ < parts) {
-    console.log(`[${filename}] deleting part ${i}/${parts}...`);
+  let remainingParts = 1;
+  while (remainingParts > 0) {
     if (isLive) {
-      let remainingParts = await deleteFunctionCall();
+      remainingParts = await deleteFunctionCall();
       if (remainingParts === -1) {
-        console.log(`no file entry found for ${filename} v${appVersion} in ${application}`)
+        console.log(`no file entry found for ${filepath} in ${application}`)
       }
 
       while (remainingParts > 0) {
-        console.log(`[${filename}] ${remainingParts} parts remaining to delete...`);
+        console.log(`[${filepath}] ${remainingParts} parts remaining to delete...`);
         remainingParts = await deleteFunctionCall();
       }
+    }
+  }
+}
+
+export async function deleteFiles({ deployer, fileContract, application, isLive }: DeleteFilesParams) {
+  const { previousFiles } = await getApplication({ deployer, fileContract, application })
+  if (previousFiles.length) {
+    console.log(`deleting ${previousFiles.length} files...`);
+    for (let filepath of previousFiles) {
+      await deleteFile({ deployer, fileContract, application, filepath, isLive })
     }
   }
 }
@@ -157,7 +157,7 @@ export async function getStorageBalance({deployer, fileContract}: GetStorageBala
   });
 }
 
-export async function unregister({deployer, fileContract}: UnregisterParams) {
+export async function withdrawAvailableBalance({deployer, fileContract}: UnregisterParams) {
   const { available } = await deployer.viewFunction({
     contractId: fileContract,
     methodName: 'storage_balance_of',
@@ -166,7 +166,7 @@ export async function unregister({deployer, fileContract}: UnregisterParams) {
     },
   });
 
-  console.log(`refunding available balance of ${available}`)
+  console.log(`refunding available balance of ${formatNearAmount(available)}`)
   await deployer.functionCall({
     contractId: fileContract,
     methodName: 'storage_withdraw',
@@ -176,7 +176,9 @@ export async function unregister({deployer, fileContract}: UnregisterParams) {
     attachedDeposit: 1n,
     gas: 300000000000000n,
   });
+}
 
+export async function unregister({deployer, fileContract}: UnregisterParams) {
   console.log(`unregistering ${deployer.accountId}...`)
   await deployer.functionCall({
     contractId: fileContract,
