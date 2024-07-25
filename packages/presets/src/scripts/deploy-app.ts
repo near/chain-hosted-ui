@@ -5,7 +5,7 @@ import {
   deployApplication,
   getApplication,
   depositDeploymentStorageCost,
-  getAccount, PARTITION_SIZE, postDeployCleanup, uploadFile, withdrawAvailableBalance, deleteFiles,
+  getAccount, PARTITION_SIZE, postDeployCleanup, uploadFile, withdrawAvailableBalance, deletePreviousFiles,
 } from './utils';
 import { formatNearAmount } from '@near-js/utils';
 
@@ -63,7 +63,7 @@ export async function deployApp() {
     const cleanupResult = await postDeployCleanup({ deployer, fileContract, application });
     console.log('deployment completed', { cleanupResult });
 
-    await deleteFiles({ deployer, fileContract, application, isLive })
+    await deletePreviousFiles({ deployer, fileContract, application, isLive })
 
     await withdrawAvailableBalance({ deployer, fileContract });
   }

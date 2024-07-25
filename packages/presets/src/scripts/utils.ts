@@ -120,7 +120,7 @@ export async function deleteFile({deployer, fileContract, application, filepath,
   }
 }
 
-export async function deleteFiles({ deployer, fileContract, application, isLive }: DeleteFilesParams) {
+export async function deletePreviousFiles({ deployer, fileContract, application, isLive }: DeleteFilesParams) {
   const { previousFiles } = await getApplication({ deployer, fileContract, application })
   if (previousFiles.length) {
     console.log(`deleting ${previousFiles.length} files...`);
