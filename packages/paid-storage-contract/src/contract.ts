@@ -89,7 +89,7 @@ class UserStorage implements StorageManagement {
     if (this.accounts.containsKey(account_id)) {
       if (registration_only) {
         near.log!("The account is already registered, refunding the deposit");
-        NearPromise.new(near.predecessorAccountId()).transfer(amount);
+        NearPromise.new(near.predecessorAccountId()).transfer(amount).build();
       } else {
         const currentValues = this.accounts.get(account_id);
         this.accounts.set(
@@ -115,7 +115,7 @@ class UserStorage implements StorageManagement {
         if (availableAmount > 0) {
           NearPromise.new(near.predecessorAccountId()).transfer(
             availableAmount
-          );
+          ).build();
         }
       } else {
         this.accounts.set(
@@ -157,7 +157,7 @@ class UserStorage implements StorageManagement {
       )
     );
 
-    NearPromise.new(predecessor_account_id).transfer(refund);
+    NearPromise.new(predecessor_account_id).transfer(refund).build();
 
     return this.accounts.get(predecessor_account_id);
   }
@@ -183,7 +183,7 @@ class UserStorage implements StorageManagement {
 
     this.accounts.remove(predecessor_account_id);
 
-    NearPromise.new(predecessor_account_id).transfer(storage_balance.total);
+    NearPromise.new(predecessor_account_id).transfer(storage_balance.total).build();
 
     return true;
   }

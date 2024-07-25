@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "near-contract-standards": "^2.0.0",
-    "near-sdk-js": "2.0.0-0"
+    "near-sdk-js": "2.0.0"
   },
   "devDependencies": {
     "ava": "^6.1.3",
