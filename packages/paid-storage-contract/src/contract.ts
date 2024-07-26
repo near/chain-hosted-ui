@@ -130,7 +130,9 @@ class UserStorage implements StorageManagement {
 
   @call({ payableFunction: true })
   storage_withdraw({ amount }: { amount: Option<bigint> }): StorageBalance {
-    amount = BigInt(amount);
+    if (amount !== null) {
+      amount = BigInt(amount);
+    }
     assert_one_yocto();
 
     const predecessor_account_id = near.predecessorAccountId();
