@@ -39,7 +39,10 @@ app.get('/*', async function (req, res) {
   const filename = filecomponents.filter((c, i) => i === 0 ? c !== application : true).join('/')
   try {
     if (!cached) {
-      const rawParts = await query('get_parts', accountId!, filename || 'index.html', undefined, application);
+      let rawParts: Buffer | null = null;
+      try {
+        rawParts = await query('get_parts', accountId!, filename || 'index.html', undefined, application);
+      } catch { /* assume exceptions are non-existent files */ }
 
       if (!rawParts) {
         res.statusCode = 404;
@@ -61,6 +64,7 @@ app.get('/*', async function (req, res) {
     }
   } catch (e: any) {
     console.log({ accountId, application, filename })
+    res.statusCode = 500;
     res.send(`error fetching ${key}: ${e.toString()}`);
     return;
   }
