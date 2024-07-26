@@ -1,5 +1,5 @@
 import { defineConfig, type PluginOption } from 'vite'
-import { replaceHtmlPaths } from '@chain-deployed-ui/presets';
+import { transformUrl } from '@chain-deployed-ui/presets';
 import { presetBundles } from '@chain-deployed-ui/presets/react';
 import react from '@vitejs/plugin-react'
 import gzipPlugin from 'rollup-plugin-gzip';
@@ -9,13 +9,12 @@ import { nearDeployConfig } from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(),visualizer() as PluginOption, gzipPlugin(), {
-    name: 'inject-bundle-url',
-    apply: 'build',
-    transformIndexHtml(html ) {
-      return replaceHtmlPaths(html, nearDeployConfig.application);
+  plugins: [react(), visualizer() as PluginOption, gzipPlugin({ additionalFiles: ['dist/vite.svg'] })],
+  experimental: {
+    renderBuiltUrl(filename) {
+      return transformUrl(filename, nearDeployConfig.application);
     }
-  }],
+  },
   define: {
     global: {},
     process: { env: {} }
