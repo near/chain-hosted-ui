@@ -84,7 +84,7 @@ app.get('/*', async function (req, res) {
   }
 
   if (req.path.endsWith('.svg')) {
-    res.set('Content-Type', 'text/svg+xml');
+    res.set('Content-Type', 'image/svg+xml');
     res.set('Content-Encoding', 'gzip');
     res.send(cached!);
     return;
