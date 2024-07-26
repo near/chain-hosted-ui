@@ -1,6 +1,6 @@
-# Chain Deployed UI
+# Chain Hosted UI
 
-This is a Pagoda experiment for deploying frontends directly on chain. These frontends are built with typical Web2 tooling (e.g. React + Vite + npm dependencies) then the resulting bundles are compressed and stored in the state of a smart contract.
+This is a Pagoda experiment for hosting frontends directly on chain. These frontends are built with typical Web2 tooling (e.g. React + Vite + npm dependencies) then the resulting bundles are compressed and stored in the state of a smart contract.
 
 The concept is simple: storage on NEAR is cheap enough that it is feasible to host small apps on chain, especially if some optimization is added to reduce redundant code between deployed dapps. This offers a straightforward path to decentralized hosting as an alternative to, or to complement, static deploy platforms like Github Pages, Vercel, etc.
 

@@ -19,6 +19,7 @@ test.beforeEach(async (t) => {
 
   // Get wasm file path from package.json test script in folder above
   await contract.deploy(process.argv[2]);
+  await contract.call(contract, "init", {});
 
   // Save state for test runs, it is unique for each test
   t.context.accounts = { root, contract };
@@ -60,17 +61,175 @@ test("returns storage balance bounds", async (t) => {
 test("adds storage balance for new user", async (t) => {
   const { root, contract } = t.context.accounts;
   const user = await root.createSubAccount("new-user");
+
+  const deposit = "1000000000000000000000000";
   await user.call(
     contract,
     "storage_deposit",
     { account_id: user.accountId },
     {
-      attachedDeposit: "1000000000000000000000000",
+      attachedDeposit: deposit,
     }
   );
   const { total, available } = await contract.view("storage_balance_of", {
     account_id: user.accountId,
   });
-  t.is(total, "1000000000000000000000000");
-  t.is(available, "1000000000000000000000000");
+  const { min } = await contract.view("storage_balance_bounds", {});
+  t.is(total, deposit);
+  t.is(available, (BigInt(deposit) - BigInt(min)).toString());
 });
+
+// storag_withdraw will amount=null refunds full available balance
+test("storage_withdraw with amount=null sets available=0", async (t) => {
+  const { root, contract } = t.context.accounts;
+  const user = await root.createSubAccount("new-user");
+  const checkBalances = partial(checkStorageBalances, contract, user);
+
+  // checkBalances("Start");
+
+  await user.call(
+    contract,
+    "storage_deposit",
+    { account_id: user.accountId },
+    {
+      attachedDeposit: "5000000000000000000000000",
+    }
+  );
+
+  // checkBalances("Deposited");
+
+  await user.call(
+    contract,
+    "storage_withdraw",
+    { amount: null },
+    {
+      attachedDeposit: "1",
+    }
+  );
+
+  const { available } = await checkBalances("Withdrawn");
+
+  t.is(available, "0");
+});
+
+// ! DISABLED since gas tokens burnt is not adding up to balance lost
+test.skip("storage_withdraw returns balance to user", async (t) => {
+  const { root, contract } = t.context.accounts;
+  const user = await root.createSubAccount("new-user");
+  const checkBalances = partial(checkStorageBalances, contract, user);
+
+  const { balance: startingBalance } = await checkBalances("Start");
+
+  let gasTokensBurnt = 0n;
+
+  const res1 = await user.callRaw(
+    contract,
+    "storage_deposit",
+    { account_id: user.accountId },
+    {
+      attachedDeposit: "5000000000000000000000000",
+    }
+  );
+
+  gasTokensBurnt += BigInt(
+    res1.result.transaction_outcome.outcome.tokens_burnt
+  );
+
+  checkBalances("Deposited");
+
+  const res2 = await user.callRaw(
+    contract,
+    "storage_withdraw",
+    { amount: null },
+    {
+      attachedDeposit: "1",
+    }
+  );
+
+  gasTokensBurnt += BigInt(
+    res2.result.transaction_outcome.outcome.tokens_burnt
+  );
+
+  const {
+    available,
+    balance: endingBalance,
+    total: endingTotal,
+  } = await checkBalances("Withdrawn");
+
+  console.log("gas tokens burnt var:", gasTokensBurnt.toString());
+  console.log(
+    "actual diff from gas:",
+    (
+      BigInt(startingBalance) -
+      BigInt(endingTotal) -
+      BigInt(endingBalance)
+    ).toString()
+  );
+
+  t.is(available, "0");
+  t.is(
+    endingBalance,
+    (BigInt(startingBalance) - BigInt(endingTotal) - gasTokensBurnt).toString()
+  );
+});
+
+// check that total after withdraw is equal to minimum storage balance
+test("withdraws storage balance to minimum", async (t) => {
+  const { root, contract } = t.context.accounts;
+  const user = await root.createSubAccount("new-user");
+  const checkBalances = partial(checkStorageBalances, contract, user);
+
+  checkBalances("Start");
+
+  await user.call(
+    contract,
+    "storage_deposit",
+    { account_id: user.accountId },
+    {
+      attachedDeposit: "5000000000000000000000000",
+    }
+  );
+
+  checkBalances("Deposited");
+
+  await user.call(
+    contract,
+    "storage_withdraw",
+    { amount: null },
+    {
+      attachedDeposit: "1",
+    }
+  );
+
+  const { total } = await checkBalances("Withdrawn");
+
+  const { min } = await contract.view("storage_balance_bounds", {});
+
+  t.is(total, min);
+});
+
+/**
+ *
+ * @param {NearAccount} contract
+ * @param {NearAccount} user
+ * @param {string} title
+ */
+async function checkStorageBalances(contract, user, title) {
+  // print args to console
+  console.log(title);
+  console.log(contract.accountId);
+  console.log(user.accountId);
+
+  const { total, available } =
+    (await contract.view("storage_balance_of", {
+      account_id: user.accountId,
+    })) ?? {};
+  const balance = (await user.availableBalance()).toString();
+  console.log(`${title} (${user.accountId})`);
+  console.table({ total, available, balance });
+  return { total, available, balance };
+}
+
+function partial(fn, ...args) {
+  return (...args2) => fn(...args, ...args2);
+}
