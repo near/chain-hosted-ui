@@ -5,6 +5,11 @@
   text-align: center;
 }
 
+.landingText {
+  max-width: 50rem;
+  text-align: "start"
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
