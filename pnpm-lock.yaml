@@ -386,6 +386,9 @@ importers:
 
   packages/vue:
     dependencies:
+      '@chain-deployed-ui/presets':
+        specifier: workspace:*
+        version: link:../presets
       '@near-js/accounts':
         specifier: ^1.2.0
         version: 1.2.0

@@ -6,10 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "deploy": "pnpm build && node deploy.js testnet",
+    "deploy": "pnpm build && pnpm deploy-application",
+    "clean-deploy": "pnpm delete-and-unregister && pnpm run deploy",
+    "deploy-application": "pnpm deploy-app ./dist testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
+    "delete-and-unregister": "pnpm delete-app-and-unregister testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application 1",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chain-deployed-ui/presets": "workspace:*",
     "@near-js/accounts": "^1.2.0",
     "@near-js/keystores-node": "^0.0.11",
     "@near-js/providers": "^0.2.1",
@@ -24,5 +28,10 @@
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
     "vue-tsc": "^2.0.6"
+  },
+  "nearDeployConfig": {
+    "application": "vue-example",
+    "deployerAccount": "gornt.testnet",
+    "filestoreContract": "pfs1.testnet"
   }
 }

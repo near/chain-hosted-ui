@@ -9,7 +9,7 @@ import { nearDeployConfig } from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(),visualizer() as PluginOption, gzipPlugin({ additionalFiles: ['vite.svg'] })],
+  plugins: [react(),visualizer() as PluginOption, gzipPlugin({ additionalFiles: ['dist/vite.svg'] })],
   experimental: {
     renderBuiltUrl(filename) {
       return transformUrl(filename, nearDeployConfig.application);

@@ -1,29 +1,28 @@
-import { defineConfig, type PluginOption } from 'vite';
+import { transformUrl } from '@chain-deployed-ui/presets';
+import { presetBundles } from '@chain-deployed-ui/presets/vue';
 import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'vite';
 import gzipPlugin from 'rollup-plugin-gzip';
-import { visualizer } from 'rollup-plugin-visualizer';
 
-import BOSConfig from './bos.json' assert { type: 'json' };
-
-const { environments, filePathMatchers } = BOSConfig
-const { deployerAccount, fileServerUrl } = environments.testnet;
+import { nearDeployConfig } from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), visualizer() as PluginOption, gzipPlugin(), {
-    name: 'inject-bundle-url',
-    apply: 'build',
-    transformIndexHtml(html ) {
-      return html.replace(/(href|src)="\/assets\/([^"]+)/g, `$1="/${deployerAccount}/$2`);
+  plugins: [vue(), gzipPlugin({ additionalFiles: ['dist/vite.svg'] })],
+  experimental: {
+    renderBuiltUrl(filename) {
+      return transformUrl(filename, nearDeployConfig.application);
     }
-  }],
+  },
+  define: {
+    global: {},
+    process: { env: {} }
+  },
   build: {
     rollupOptions: {
       output: {
-        manualChunks: function (id, x) {
-          if (id.includes('BosRoot')) {
-            return 'preset';
-          }
+        manualChunks: {
+          preset: presetBundles.vue,
         },
       },
     },
