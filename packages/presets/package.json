@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "tsc -p tsconfig.json && pnpm build:react",
-    "build:react": "tsc ./src/react/index.tsx --target esnext --moduleResolution node --module esnext --declaration true --jsx react-jsx --outDir ./dist/react && mv ./dist/react/index.js ./dist/react/index.mjs"
+    "build": "tsc -p tsconfig.json && pnpm build:react && pnpm build:vue",
+    "build:react": "tsc ./src/react/index.tsx --target esnext --moduleResolution node --module esnext --declaration true --jsx react-jsx --outDir ./dist/react && mv ./dist/react/index.js ./dist/react/index.mjs",
+    "build:vue": "tsc ./src/vue/index.ts --target esnext --moduleResolution node --module esnext --declaration true --outDir ./dist/vue && mv ./dist/vue/index.js ./dist/vue/index.mjs"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +34,10 @@
     "./react": {
       "types": "./dist/react/index.d.ts",
       "default": "./dist/react/index.mjs"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "default": "./dist/vue/index.mjs"
     }
   },
   "bin": {
