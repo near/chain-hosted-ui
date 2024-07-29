@@ -7,7 +7,6 @@ import {
 import {
   AccountId,
   Balance,
-  LookupMap,
   NearBindgen,
   NearPromise,
   StorageUsage,
@@ -44,7 +43,7 @@ const ACCOUNTS_MAP_PREFIX = "chain-deployed-ui";
 
 @NearBindgen({})
 class UserStorage implements StorageManagement {
-  accounts: LookupMap<StorageBalance>;
+  accounts: UnorderedMap<StorageBalance>;
   applications: UnorderedMap<Application>;
   filemap: UnorderedMap<number>;
   partitions: UnorderedMap<string>;
@@ -52,7 +51,7 @@ class UserStorage implements StorageManagement {
   account_storage_usage: StorageUsage;
 
   constructor() {
-    this.accounts = new LookupMap(ACCOUNTS_MAP_PREFIX);
+    this.accounts = new UnorderedMap(ACCOUNTS_MAP_PREFIX);
     this.account_storage_usage = 0n;
     this.applications = new UnorderedMap("apps");
     this.filemap = new UnorderedMap("pieces");
@@ -86,12 +85,12 @@ class UserStorage implements StorageManagement {
 
     assert(amount > 0, "Deposit amount must be greater than zero");
 
-    if (this.accounts.containsKey(account_id)) {
+    const currentValues = this.accounts.get(account_id);
+    if (currentValues) {
       if (registration_only) {
         near.log!("The account is already registered, refunding the deposit");
         NearPromise.new(near.predecessorAccountId()).transfer(amount).build();
       } else {
-        const currentValues = this.accounts.get(account_id);
         this.accounts.set(
           account_id,
           new StorageBalance(
@@ -200,11 +199,7 @@ class UserStorage implements StorageManagement {
   }
 
   internal_storage_balance_of(account_id: AccountId): Option<StorageBalance> {
-    if (this.accounts.containsKey(account_id)) {
-      return this.accounts.get(account_id);
-    } else {
-      return null;
-    }
+    return this.accounts.get(account_id) || null;
   }
 
   @view({})
