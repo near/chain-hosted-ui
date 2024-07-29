@@ -2,13 +2,17 @@ import { NearDappProvider } from "@chain-deployed-ui/presets/react";
 
 import "./App.css";
 import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import nearLogo from "./assets/near.svg";
 import WalletManager from "./WalletManager";
 
 function App() {
   return (
     <NearDappProvider>
       <div>
+        <div className="iconRow">
+          <img src={nearLogo} className="logo" alt="NEAR logo" />
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </div>
         <h1>Chain Hosted UI - React</h1>
         <p className="landingText">
           This is an example React application deployed to the NEAR blockchain.
@@ -22,12 +26,6 @@ function App() {
           assets fetched via RPC from the contract.
         </p>
         <WalletManager />
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
       </div>
     </NearDappProvider>
   );

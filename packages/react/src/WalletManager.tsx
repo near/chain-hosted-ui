@@ -1,37 +1,36 @@
-import { NearContext } from "@chain-deployed-ui/presets/react";
-import {
-  setupModal,
-  WalletSelectorModal,
-} from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useWallet } from "./useWallet";
 
 function WalletManager() {
-  const wallet = useContext(NearContext);
-
-  const [modal, setModal] = useState<WalletSelectorModal>();
+  const { account, wallet, walletSelectorModal } = useWallet();
 
   useEffect(() => {
-    console.log("wallet", wallet);
-    if (wallet) {
-      setModal(
-        setupModal(wallet, {
-          contractId: "mpps1.testnet",
-          theme: "light",
-        })
-      );
-    }
-  }, [wallet]);
+    console.log("walletDeets", account);
+  }, [account]);
 
   return (
-    <button
-      onClick={() => {
-        modal?.show();
+    <div
+      style={{
+        display: "inline-flex",
+        flexDirection: "column",
+        gap: "1rem",
       }}
     >
-      Sign In
-    </button>
+      <button
+        onClick={() => {
+          if (account) {
+            wallet?.signOut().catch(console.error);
+          } else {
+            walletSelectorModal?.show();
+          }
+        }}
+      >
+        {account ? "Sign Out" : "Sign In"}
+      </button>
+      {account && <span>Signed in as: {account.accountId}</span>}
+    </div>
   );
 }
 
