@@ -9,7 +9,7 @@
     "deploy": "pnpm build && pnpm deploy-application",
     "clean-deploy": "pnpm delete-and-unregister && pnpm run deploy",
     "deploy-application": "pnpm deploy-app ./dist testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
-    "delete-and-unregister": "pnpm delete-app-and-unregister testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application 1",
+    "delete-and-unregister": "pnpm delete-app-and-unregister testnet $npm_package_nearDeployConfig_filestoreContract $npm_package_nearDeployConfig_deployerAccount $npm_package_nearDeployConfig_application",
     "preview": "vite preview"
   },
   "dependencies": {

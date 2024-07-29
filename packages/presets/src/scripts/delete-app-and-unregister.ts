@@ -1,7 +1,7 @@
 import { deleteApplication, deleteFile, getAccount, listAppFiles, unregister, withdrawAvailableBalance } from './utils';
 
 export async function deleteApplicationAndUnregister() {
-  const [,, network, fileContract, deployerAccount, application, appVersion, isLiveRun = true] = process.argv;
+  const [,, network, fileContract, deployerAccount, application, isLiveRun = true] = process.argv;
   const deployer = getAccount({ accountId: deployerAccount, network });
 
   const files = (await listAppFiles({ deployer, fileContract, application })) || [];
