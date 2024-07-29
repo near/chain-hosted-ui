@@ -1,15 +1,11 @@
-import {
-  NearContext,
-  NearDappProvider,
-} from "@chain-deployed-ui/presets/react";
-import { useContext } from "react";
+import { NearDappProvider } from "@chain-deployed-ui/presets/react";
 
 import "./App.css";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
+import WalletManager from "./WalletManager";
 
 function App() {
-  const wallet = useContext(NearContext);
   return (
     <NearDappProvider>
       <div>
@@ -25,9 +21,7 @@ function App() {
           for responding to browser resource requests with the appropriate
           assets fetched via RPC from the contract.
         </p>
-
-        <h2>wallet initialized? {(wallet === null).toString()}</h2>
-        <h2>signed in? {(wallet?.isSignedIn() || false).toString()}</h2>
+        <WalletManager />
         <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>

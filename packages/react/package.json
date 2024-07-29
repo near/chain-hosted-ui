@@ -14,7 +14,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chain-deployed-ui/presets": "workspace:*"
+    "@chain-deployed-ui/presets": "workspace:*",
+    "@near-wallet-selector/modal-ui": "^8.9.11"
   },
   "devDependencies": {
     "@near-js/accounts": "^1.2.0",
