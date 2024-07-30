@@ -502,4 +502,19 @@ class UserStorage implements StorageManagement {
     this.pay_storage_cost(diff);
     return { remainingParts, diff }
   }
+
+  /**
+   * List all existing accounts
+   */
+  @view({})
+  list_all_accounts(): { [key: string]: StorageBalance } {
+    // @ts-ignore
+    const keys: string[] = this.accounts.keys({});
+    const result: { [key: string]: StorageBalance } = {};
+    for (const key of keys) {
+      result[key] = this.accounts.get(key) || new StorageBalance(0n, 0n);
+    }
+
+    return result;
+  }
 }
