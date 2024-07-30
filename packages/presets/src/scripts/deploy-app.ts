@@ -64,6 +64,7 @@ export async function deployApp() {
     await uploadFile({ deployer, fileContract, fileContents, filename, partitions, isLive, application });
   }
 
+  console.log(`your application is now available at http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/${fileContract}/${deployerAccount}/${application}`)
   console.log(`all files uploaded for ${application}, beginning post-deploy actions`)
   if (isLive) {
     const cleanupResult = await postDeployCleanup({ deployer, fileContract, application });
