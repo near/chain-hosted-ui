@@ -68,13 +68,14 @@ New projects may use the `react` or `vue` packages; demo packages preconfigured 
 using the specified view library. The process is largely the same regardless of the template chosen:
 
 1. Run `pnpm i && pnpm build` at the monorepo project root. 
-2. Configure the `nearDeployConfig` field in `package.json`:
+2. `cd` into the desired template directory (e.g. `cd packages/react`).
+3. Configure the `nearDeployConfig` field in `package.json`:
    1. `application` is developer-defined and will be used as part of the URL (names should match `[a-z_-]+`)
    2. `deployerAccount` is your account that pays for bundle storage and calls smart contract methods. This corresponds to the keystore created above (must match `DEPLOYER_ACCOUNT.near`)
    3. `filestoreContract` is the chain-hosted-ui contract (`pfs1.testnet` on testnet and `v1.chainui.near` on mainnet, or deployed and configured separately)
-3. Add components, content, and/or NPM dependencies to the application.
-4. Run `pnpm run deploy` to build the project bundle and deploy the application on chain. You will be presented with the estimated cost to approve before executing the deploy
-5. Load the application at `http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/FILE_CONTRACT.near/DEPLOYER_ACCOUNT.near/APPLICATION-NAME` (with `FILE_CONTRACT` being `pfs1.testnet` or `v1.chainui.near`)
+4. Add components, content, and/or NPM dependencies to the application.
+5. Run `pnpm run deploy` to build the project bundle and deploy the application on chain. You will be presented with the estimated cost to approve before executing the deployment.
+6. Load the application at `http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/FILE_CONTRACT.near/DEPLOYER_ACCOUNT.near/APPLICATION-NAME` (with `FILE_CONTRACT` being `pfs1.testnet` or `v1.chainui.near`)
 
 Once deployed, new deployments can be made or the application can be removed (with any remaining storage being refunded):
 - To deploy a new version, run `pnpm run deploy` after making changes. This will increment the application version, delete previous files, and refund any remaining available balance.
