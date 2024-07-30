@@ -37,8 +37,7 @@ const ContentHeaders: { [key: string]: { [key: string]: string } } = {
 
 const query = async ({ filestoreContract, method, accountId, filename, part, application }: QueryParams) => {
   const isTestnet = filestoreContract.endsWith('testnet');
-  console.log(filestoreContract, isTestnet)
-  const provider = new JsonRpcProvider({ url: isTestnet ? 'https://rpc.testnet.pagoda.co' : 'https://rpc.pagoda.co' });
+  const provider = new JsonRpcProvider({ url: isTestnet ? 'https://rpc.testnet.near.org' : 'https://rpc.near.org' });
 
   // @ts-expect-error FIXME typing
   const { result } = await provider.query<{ result: Buffer }>({
