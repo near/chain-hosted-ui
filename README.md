@@ -71,7 +71,7 @@ using the specified view library. The process is largely the same regardless of 
 2. Configure the `nearDeployConfig` field in `package.json`:
    1. `application` is developer-defined and will be used as part of the URL (names should match `[a-z_-]+`)
    2. `deployerAccount` is your account that pays for bundle storage and calls smart contract methods. This corresponds to the keystore created above (must match `DEPLOYER_ACCOUNT.near`)
-   3. `filestoreContract` is the hosted storage contract (`pfs1.testnet` on testnet and `v1.chainui.near` on mainnet, or deployed and configured separately)
+   3. `filestoreContract` is the chain-hosted-ui contract (`pfs1.testnet` on testnet and `v1.chainui.near` on mainnet, or deployed and configured separately)
 3. Add components, content, and/or NPM dependencies to the application.
 4. Run `pnpm run deploy` to build the project bundle and deploy the application on chain.
 5. Load the application at `http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/FILE_CONTRACT.near/DEPLOYER_ACCOUNT.near/APPLICATION-NAME` (with `FILE_CONTRACT` being `pfs1.testnet` or `v1.chainui.near`)
