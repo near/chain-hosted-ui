@@ -7,13 +7,43 @@ app.use(cors());
 
 const sourceCache = new Map<string, Uint8Array>();
 
-const query = async (method: string, accountId: string, filename: string, part?: number, application?: string) => {
-  const provider = new JsonRpcProvider({ url: 'https://rpc.testnet.pagoda.co' });
+interface QueryParams {
+  method: string;
+  accountId: string;
+  filename: string;
+  part?: number;
+  application?: string;
+  filestoreContract: string;
+}
+
+
+const ContentHeaders: { [key: string]: { [key: string]: string } } = {
+  css: {
+    'Content-Type': 'text/css',
+    'Content-Encoding': 'gzip',
+  },
+  js: {
+    'Content-Type': 'text/javascript',
+    'Content-Encoding': 'gzip',
+  },
+  svg: {
+    'Content-Type': 'image/svg+xml',
+    'Content-Encoding': 'gzip',
+  },
+  html: {
+    'Content-Type': 'text/html',
+  },
+};
+
+const query = async ({ filestoreContract, method, accountId, filename, part, application }: QueryParams) => {
+  const isTestnet = filestoreContract.endsWith('testnet');
+  console.log(filestoreContract, isTestnet)
+  const provider = new JsonRpcProvider({ url: isTestnet ? 'https://rpc.testnet.pagoda.co' : 'https://rpc.pagoda.co' });
 
   // @ts-expect-error FIXME typing
   const { result } = await provider.query<{ result: Buffer }>({
     request_type: 'call_function',
-    account_id: 'pfs1.testnet',
+    account_id: filestoreContract,
     method_name: method,
     finality: 'optimistic',
     args_base64: Buffer.from(new TextEncoder().encode(JSON.stringify({
@@ -21,7 +51,7 @@ const query = async (method: string, accountId: string, filename: string, part?:
       filename,
       ...(part !== undefined ? { part } : {}),
       ...(application !== undefined ? { application } : {}),
-    }))).toString('base64')
+    }))).toString('base64'),
   });
 
   if (Buffer.from(result).toString() === 'null') {
@@ -29,20 +59,28 @@ const query = async (method: string, accountId: string, filename: string, part?:
   }
 
   return result;
-}
+};
 
 app.get('/*', async function (req, res) {
   const key = req.path.slice(1);
   let cached: Uint8Array | undefined = sourceCache.get(key);
-  console.log(key)
-  const [accountId, application, ...filecomponents] = key.split('/');
-  const filename = filecomponents.filter((c, i) => i === 0 ? c !== application : true).join('/')
+  console.log(key);
+  const [filestoreContract, accountId, application, ...filecomponents] = key.split('/');
+  const filename = filecomponents.filter((c, i) => i === 0 ? c !== application : true).join('/') || 'index.html';
   try {
     if (!cached) {
       let rawParts: Buffer | null = null;
       try {
-        rawParts = await query('get_parts', accountId!, filename || 'index.html', undefined, application);
-      } catch { /* assume exceptions are non-existent files */ }
+        rawParts = await query({
+          method: 'get_parts',
+          accountId: accountId!,
+          filename,
+          part: undefined,
+          application,
+          filestoreContract: filestoreContract!,
+        });
+      } catch { /* assume exceptions are non-existent files */
+      }
 
       if (!rawParts) {
         res.statusCode = 404;
@@ -54,7 +92,14 @@ app.get('/*', async function (req, res) {
       const requests = (new Array(parts))
         // @ts-ignore
         .fill()
-        .map((_, i) => query('get_partition', accountId!, filename, i, application));
+        .map((_, i) => query({
+          method: 'get_partition',
+          accountId: accountId!,
+          filename,
+          part: i,
+          application,
+          filestoreContract: filestoreContract!,
+        }));
 
       const partitions = await Promise.all(requests);
 
@@ -63,40 +108,22 @@ app.get('/*', async function (req, res) {
       sourceCache.set(req.path, cached);
     }
   } catch (e: any) {
-    console.log({ accountId, application, filename })
+    console.log({ accountId, application, filename });
     res.statusCode = 500;
     res.send(`error fetching ${key}: ${e.toString()}`);
     return;
   }
 
-  if (req.path.endsWith('.css')) {
-    res.set('Content-Type', 'text/css');
-    res.set('Content-Encoding', 'gzip');
-    res.send(cached!);
+  const [extension] = filename.split('.').slice(-1);
+  const contentHeaders = ContentHeaders[extension!];
+  if (!contentHeaders) {
+    res.send(`unknown key ${key}`);
     return;
   }
 
-  if (req.path.endsWith('.js')) {
-    res.set('Content-Type', 'text/javascript');
-    res.set('Content-Encoding', 'gzip');
-    res.send(cached!);
-    return;
-  }
-
-  if (req.path.endsWith('.svg')) {
-    res.set('Content-Type', 'image/svg+xml');
-    res.set('Content-Encoding', 'gzip');
-    res.send(cached!);
-    return;
-  }
-
-  if (req.path.endsWith('.html') || !filename) {
-    res.set('Content-Type', 'text/html');
-    res.send(cached!);
-    return;
-  }
-
-  res.send(`unknown key ${key}`);
+  Object.entries(contentHeaders).forEach(([key, value]: [string, string]) => res.set(key, value));
+  res.send(cached);
+  return;
 });
 
 app.listen(3003);
