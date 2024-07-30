@@ -31,7 +31,7 @@
   },
   "nearDeployConfig": {
     "application": "vue-example",
-    "deployerAccount": "gornt.testnet",
-    "filestoreContract": "pfs1.testnet"
+    "deployerAccount": "<YOUR_ACCOUNT_ID>",
+    "filestoreContract": "v1.chain-hosted-ui.testnet"
   }
 }
