@@ -5,6 +5,11 @@
   text-align: center;
 }
 
+.landingText {
+  max-width: 50rem;
+  text-align: "start"
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -39,4 +44,14 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.iconRow {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+
+  img {
+    height: 3em;
+  }
 }

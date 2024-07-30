@@ -8,6 +8,7 @@ import {
   getAccount, PARTITION_SIZE, postDeployCleanup, uploadFile, withdrawAvailableBalance, deletePreviousFiles,
 } from './utils';
 import { formatNearAmount } from '@near-js/utils';
+import { confirm } from '@inquirer/prompts';
 
 interface BundleAsset {
   contentPath: string;
@@ -43,8 +44,13 @@ export async function deployApp() {
 
   const { files, aggregated: { totalBytes, totalPartitions } } = aggregateBundle(deployerAccount, application, basePath);
   const { applicationStorageCost, breakdown } = await calculateApplicationDeploymentCost({ deployer, application, files, totalBytes, fileContract });
-
   console.log(`${application} deployment calculated to cost ${formatNearAmount(applicationStorageCost)} N`, breakdown)
+  const answer = await confirm({ message: `Estimated cost to deploy is ${formatNearAmount(applicationStorageCost)} N. Continue?`, default: false });
+  if (!answer) {
+    console.log('Exiting deployment');
+    process.exit(1);
+  }
+
 
   const isLive = isLiveRun === true;
   if (isLive) {

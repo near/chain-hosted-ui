@@ -12,7 +12,7 @@ No, a smart contract will be deployed which is able to store and serve bundles f
 
 The cost structure will look very different.
 
-Many web developers are used to starting with free hosting for small apps, since that is widely subsidized by Web2 hosting companies. After that, subsciption plans are common.
+Many web developers are used to starting with free hosting for small apps, since that is widely subsidized by Web2 hosting companies. After that, subscription plans are common.
 
 When deploying on chain, you pay for the storage space of your built+minified+compressed bundles. This means it is more important to pay attention to the size of dependencies you include in your application, as packages that are bloated or do not support proper tree-shaking will directly affect your cost.
 
