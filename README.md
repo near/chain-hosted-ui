@@ -1,5 +1,7 @@
 # Chain Hosted UI
 
+To try it yourself, jump to [Getting Started](#getting-started)
+
 This is a Pagoda experiment for hosting frontends directly on chain. These frontends are built with typical Web2 tooling (e.g. React + Vite + npm dependencies) then the resulting bundles are compressed and stored in the state of a smart contract.
 
 The concept is simple: storage on NEAR is cheap enough that it is feasible to host small apps on chain, especially if some optimization is added to reduce redundant code between deployed dapps. This offers a straightforward path to decentralized hosting as an alternative to, or to complement, static deploy platforms like Github Pages, Vercel, etc.
@@ -22,6 +24,8 @@ NEAR uses storage staking, where NEAR tokens are locked while storage is being u
 
 By building off a provided template with preconfigured code splitting, it is possible to yield separate bundles for the template boilerplate and the custom dapp code. The template boilerplate can be uploaded once then served for every dapp built on that template. This decreases the cost of a deploy to only the custom dapp code + dependencies.
 
+> ⚠️ Storage optimizations are not yet implemented in the current release
+
 ## Asset Hosting
 
 There is not yet a specific recommendation for hosting the larger assets a web app may rely on (e.g. images). Leveraging a decentralized storage service would make sense to maintain a fully decentralized deploy.
@@ -39,6 +43,10 @@ A gateway server could also be distributed as a binary to be run locally on a us
 An RPC provider services requests for chain data. For resilience, gateways should ideally be capable of falling back to a different provider in the event the primary provider is experiencing degraded service.
 
 ## Getting Started
+
+> ℹ️ The current available release is an MVP. Please try it out and let us know how it helps fulfill your use cases!
+
+> ⚠️ The contract has not yet undergone a security audit. Until it does, we advise against depositing large sums of NEAR
 
 At this time, the easiest way to get started is by cloning this repository. Ultimately, the goal is to publish an NPM
 package providing bundle configuration and component presets. Until then, new applications may take advantage of the
