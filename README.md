@@ -37,3 +37,60 @@ A gateway server could also be distributed as a binary to be run locally on a us
 ## RPC
 
 An RPC provider services requests for chain data. For resilience, gateways should ideally be capable of falling back to a different provider in the event the primary provider is experiencing degraded service.
+
+## Getting Started
+
+At this time, the easiest way to get started is by cloning this repository. Ultimately, the goal is to publish an NPM
+package providing bundle configuration and component presets. Until then, new applications may take advantage of the
+demo projects in this monorepo while existing applications may be copied over.
+
+The deployment scripts currently only support the keystore utilized by Near JS CLI. This CLI can be used to initialize
+keystore credentials for the deployment account (see [near login](https://docs.near.org/tools/near-cli#near-login)
+documentation). Alternatively, this may be configured manually by creating a JSON file at the path
+`~/.near-credentials/mainnet/DEPLOYER_ACCOUNT.near.json` (replace `mainnet` with `testnet` for testnet) with the
+following content:
+```json
+{
+  "account_id":"DEPLOYER_ACCOUNT.near",
+  "public_key":"ed25519:44_CHARACTERS_BASE_58",
+  "private_key":"ed25519:88_CHARACTERS_BASE_58"
+}
+```
+
+Also note that in order to do a roll forward deployment, both sets of application files must exist simultaneously to
+avoid downtime. Consequently, storage must be paid ahead of each deployment to account for the new files, regardless
+of whether the application is already deployed. Once the deployment is live, the files from the previous deployment
+are deleted and storage is refunded as part of the deployment script.
+
+### New Projects
+
+New projects may use the `react` or `vue` packages; demo packages preconfigured to produce and deploy applications
+using the specified view library. The process is largely the same regardless of the template chosen:
+
+1. Run `pnpm i && pnpm build` at the monorepo project root. 
+2. `cd` into the desired template directory (e.g. `cd packages/react`).
+3. Configure the `nearDeployConfig` field in `package.json`:
+   1. `application` is developer-defined and will be used as part of the URL (names should match `[a-z_-]+`)
+   2. `deployerAccount` is your account that pays for bundle storage and calls smart contract methods. This corresponds to the keystore created above (must match `DEPLOYER_ACCOUNT.near`)
+   3. `filestoreContract` is the chain-hosted-ui contract (`pfs1.testnet` on testnet and `v1.chainui.near` on mainnet, or deployed and configured separately)
+4. Add components, content, and/or NPM dependencies to the application.
+5. Run `pnpm run deploy` to build the project bundle and deploy the application on chain. You will be presented with the estimated cost to approve before executing the deployment.
+6. Load the application at `http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/FILE_CONTRACT.near/DEPLOYER_ACCOUNT.near/APPLICATION-NAME` (with `FILE_CONTRACT` being `pfs1.testnet` or `v1.chainui.near`)
+
+Once deployed, new deployments can be made or the application can be removed (with any remaining storage being refunded):
+- To deploy a new version, run `pnpm run deploy` after making changes. This will increment the application version, delete previous files, and refund any remaining available balance.
+- To delete application storage, refund storage-staked Near, and unregister the deployment account, run `pnpm delete-and-unregister`.
+- To drop and recreate the application, run `pnpm clean-deploy`.
+
+
+### Existing Applications
+
+As mentioned above, the recommendation for trying this solution on existing applications is to copy over the source
+into this monorepo. For compatibility with the current deployment scripts, there are two bundling requirements that
+must be met:
+- `rollup-plugin-gzip` is required in bundling to generate the compressed `.gz` files expected by the deployment script.
+- `experimental.renderBuiltUrl` must be specified such that on-chain assets are prefixed with the application name. This is required
+   for routing to work correctly. E.g. `/assets/a.js` must become `APPLICATION_NAME/assets/a.js` if it's hosted on-chain).
+
+Once the bundling is configured, the next step is to call the `deploy-app` and `delete-app-and-unregister` binaries imported
+from `@chain-deployed-ui/presets`. See the [react](./packages/react/package.json) project configuration for example usage.
