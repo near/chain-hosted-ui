@@ -27,7 +27,7 @@ function WalletManager() {
           }
         }}
       >
-        {account ? "Sign Out" : "Sign In"}
+        {account ? "Sign Out" : "Sign In (testnet)"}
       </button>
       {account && <span>Signed in as: {account.accountId}</span>}
     </div>
