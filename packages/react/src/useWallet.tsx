@@ -43,7 +43,7 @@ export const useWallet = () => {
     if (walletSelector) {
       setWalletSelectorModal(
         setupModal(walletSelector, {
-          contractId: "mpps1.testnet",
+          contractId: "chain-hosted-ui.near", // demo
           theme: "light",
         })
       );
