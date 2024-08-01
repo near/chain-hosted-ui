@@ -10,6 +10,12 @@ The concept is simple: storage on NEAR is cheap enough that it is feasible to ho
 
 No, a smart contract will be deployed which is able to store and serve bundles for any user. You only need to understand how to sign a transaction (with help from our tooling) and to have enough NEAR tokens to pay for storage.
 
+> How does this relate to [Web4](https://web4.near.page/) or [BOS / Near Social](https://near.social/)?
+
+This experiment was heavily inspired by both of those projects. It takes ideas from each and strives to find the most effective balance between them.
+
+It offers a simple deploy flow to an existing [NEP-0145(User funded storage) ](https://github.com/near/NEPs/blob/master/neps/nep-0145.md) contract, without asking that you give up your framework and dependencies of choice.
+
 > How does the cost compare to Web2 hosting solutions?
 
 The cost structure will look very different.
@@ -57,11 +63,12 @@ keystore credentials for the deployment account (see [near login](https://docs.n
 documentation). Alternatively, this may be configured manually by creating a JSON file at the path
 `~/.near-credentials/mainnet/DEPLOYER_ACCOUNT.near.json` (replace `mainnet` with `testnet` for testnet) with the
 following content:
+
 ```json
 {
-  "account_id":"DEPLOYER_ACCOUNT.near",
-  "public_key":"ed25519:44_CHARACTERS_BASE_58",
-  "private_key":"ed25519:88_CHARACTERS_BASE_58"
+  "account_id": "DEPLOYER_ACCOUNT.near",
+  "public_key": "ed25519:44_CHARACTERS_BASE_58",
+  "private_key": "ed25519:88_CHARACTERS_BASE_58"
 }
 ```
 
@@ -75,7 +82,7 @@ are deleted and storage is refunded as part of the deployment script.
 New projects may use the `react` or `vue` packages; demo packages preconfigured to produce and deploy applications
 using the specified view library. The process is largely the same regardless of the template chosen:
 
-1. Run `pnpm i && pnpm build` at the monorepo project root. 
+1. Run `pnpm i && pnpm build` at the monorepo project root.
 2. `cd` into the desired template directory (e.g. `cd packages/react`).
 3. Configure the `nearDeployConfig` field in `package.json`:
    1. `application` is developer-defined and will be used as part of the URL (names should match `[a-z_-]+`)
@@ -86,19 +93,20 @@ using the specified view library. The process is largely the same regardless of 
 6. Load the application at `http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/FILE_CONTRACT/DEPLOYER_ACCOUNT/APPLICATION-NAME` (with `FILE_CONTRACT` `DEPLOYER_ACCOUNT` and `APPLICATION-NAME` replaced with the values set during step 3)
 
 Once deployed, new deployments can be made or the application can be removed (with any remaining storage being refunded):
+
 - To deploy a new version, run `pnpm run deploy` after making changes. This will increment the application version, delete previous files, and refund any remaining available balance.
 - To delete application storage, refund storage-staked Near, and unregister the deployment account, run `pnpm delete-and-unregister`.
 - To drop and recreate the application, run `pnpm clean-deploy`.
-
 
 ### Existing Applications
 
 As mentioned above, the recommendation for trying this solution on existing applications is to copy over the source
 into this monorepo. For compatibility with the current deployment scripts, there are two bundling requirements that
 must be met:
+
 - `rollup-plugin-gzip` is required in bundling to generate the compressed `.gz` files expected by the deployment script.
 - `experimental.renderBuiltUrl` must be specified such that on-chain assets are prefixed with the application name. This is required
-   for routing to work correctly. E.g. `/assets/a.js` must become `APPLICATION_NAME/assets/a.js` if it's hosted on-chain).
+  for routing to work correctly. E.g. `/assets/a.js` must become `APPLICATION_NAME/assets/a.js` if it's hosted on-chain).
 
 Once the bundling is configured, the next step is to call the `deploy-app` and `delete-app-and-unregister` binaries imported
 from `@chain-deployed-ui/presets`. See the [react](./packages/react/package.json) project configuration for example usage.
