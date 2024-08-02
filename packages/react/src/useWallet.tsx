@@ -40,16 +40,15 @@ export const useWallet = () => {
   );
 
   useEffect(() => {
-    console.log("wallet", wallet);
-    if (wallet) {
+    if (walletSelector) {
       setWalletSelectorModal(
         setupModal(walletSelector, {
-          contractId: "mpps1.testnet",
+          contractId: "chain-hosted-ui.near", // demo
           theme: "light",
         })
       );
     }
-  }, [wallet]);
+  }, [walletSelector]);
 
   useEffect(() => {
     if (!walletSelector) return;
