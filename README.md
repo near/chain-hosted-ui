@@ -90,7 +90,7 @@ using the specified view library. The process is largely the same regardless of 
    3. `filestoreContract` is the chain-hosted-ui contract (`v1.chain-hosted-ui.testnet` on testnet and `v1.chain-hosted-ui.near` on mainnet, or deployed and configured separately)
 4. Add components, content, and/or NPM dependencies to the application.
 5. Run `pnpm run deploy` to build the project bundle and deploy the application on chain. You will be presented with the estimated cost to approve before executing the deployment.
-6. Load the application at `http://ec2-54-185-81-147.us-west-2.compute.amazonaws.com/FILE_CONTRACT/DEPLOYER_ACCOUNT/APPLICATION-NAME` (with `FILE_CONTRACT` `DEPLOYER_ACCOUNT` and `APPLICATION-NAME` replaced with the values set during step 3)
+6. Load the application at `https://chain-hosted-ui.near.dev/FILE_CONTRACT/DEPLOYER_ACCOUNT/APPLICATION-NAME` (with `FILE_CONTRACT` `DEPLOYER_ACCOUNT` and `APPLICATION-NAME` replaced with the values set during step 3)
 
 Once deployed, new deployments can be made or the application can be removed (with any remaining storage being refunded):
 
