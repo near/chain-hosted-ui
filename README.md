@@ -1,5 +1,7 @@
 # Chain Hosted UI
 
+> ⚠️ This experiment reached the MVP stage of functionality but no longer has a maintainer due to [Pagoda winding down](https://docs.near.org/blog/2024-08-13-pagoda-services). We encourage interested parties to fork the project and carry it forward. The smart contract has not yet been audited
+
 To try it yourself, jump to [Getting Started](#getting-started)
 
 This is a Pagoda experiment for hosting frontends directly on chain. These frontends are built with typical Web2 tooling (e.g. React + Vite + npm dependencies) then the resulting bundles are compressed and stored in the state of a smart contract.
